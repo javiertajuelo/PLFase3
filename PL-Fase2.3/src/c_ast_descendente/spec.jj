@@ -1,0 +1,661 @@
+options  {
+  STATIC=false;
+  DEBUG_PARSER=true;
+}  
+PARSER_BEGIN(ConstructorASTsTiny)
+package c_ast_descendente;
+import asint.ClaseSemanticaTiny;
+import asint.SintaxisAbstractaTiny.*; // Se asume que los nodos AST (Prog, Decs, LDecs, Dec, Tipo, etc.) están definidos aquí.
+import c_ast_ascendente.UnidadLexica.StringLocalizado;
+
+public class ConstructorASTsTiny {
+    private ClaseSemanticaTiny sem = new ClaseSemanticaTiny();
+}
+PARSER_END(ConstructorASTsTiny)
+
+TOKEN : { <IF: ["i","I"]["f","F"]> }
+TOKEN : { <ELSE: ["e","E"]["l","L"]["s","S"]["e","E"]> }
+TOKEN : { <WHILE: ["w","W"]["h","H"]["i","I"]["l","L"]["e","E"]> }
+TOKEN : { <READ: ["r","R"]["e","E"]["a","A"]["d","D"]> }
+TOKEN : { <WRITE: ["w","W"]["r","R"]["i","I"]["t","T"]["e","E"]> }
+TOKEN : { <NEW: ["n","N"]["e","E"]["w","W"]> }
+TOKEN : { <DELETE: ["d","D"]["e","E"]["l","L"]["e","E"]["t","T"]["e","E"]> }
+TOKEN : { <CALL: ["c","C"]["a","A"]["l","L"]["l","L"]> }
+TOKEN : { <NL: ["n","N"]["l","L"]> }
+TOKEN : { <TRUE: ["t","T"]["r","R"]["u","U"]["e","E"]> }
+TOKEN : { <FALSE: ["f","F"]["a","A"]["l","L"]["s","S"]["e","E"]> }
+TOKEN : { <NULL: ["n","N"]["u","U"]["l","L"]["l","L"]> }
+TOKEN : { <STRUCT: ["s","S"]["t","T"]["r","R"]["u","U"]["c","C"]["t","T"]> }
+TOKEN : { <PROC: ["p","P"]["r","R"]["o","O"]["c","C"]> }
+TOKEN : { <TYPE: ["t","T"]["y","Y"]["p","P"]["e","E"]> }
+TOKEN : { <EVAL: "@" > }
+TOKEN : { <AND: ["a","A"]["n","N"]["d","D"]> }
+TOKEN : { <OR: ["o","O"]["r","R"]> }
+TOKEN : { <NOT: ["n","N"]["o","O"]["t","T"]> }
+TOKEN : { <INT: ["i","I"]["n","N"]["t","T"]> }
+TOKEN : { <REAL: ["r","R"]["e","E"]["a","A"]["l","L"]> }
+TOKEN : { <BOOL: ["b","B"]["o","O"]["o","O"]["l","L"]> }
+TOKEN : { <STRING: ["s","S"]["t","T"]["r","R"]["i","I"]["n","N"]["g","G"]> }
+TOKEN : { <IDEN: (<LETRA> | "_") (<LETRA> | <DIGITO> | "_")* > }
+TOKEN : { <LIT_ENT: (["+", "-"])? <PARTE_ENTERA> > }
+TOKEN : { <LIT_REAL: (["+", "-"])? <PARTE_ENTERA> ("." <PARTE_DECIMAL> (<EXPONENTE>)? | "." <PARTE_DECIMAL> | <EXPONENTE>) > }
+TOKEN : { <LIT_CADENA: "\"" (~["\""])* "\"" > }
+TOKEN : { <#LETRA: ["a"-"z","A"-"Z"]> }
+TOKEN : { <#DIGITO_POSITIVO: ["1"-"9"]> }
+TOKEN : { <#DIGITO: <DIGITO_POSITIVO> | "0"> }
+TOKEN : { <#PARTE_ENTERA: <DIGITO_POSITIVO> (<DIGITO>)* | "0"> }
+TOKEN : { <#PARTE_DECIMAL: (<DIGITO>)* <DIGITO_POSITIVO> | "0"> }
+TOKEN : { <#EXPONENTE: ["e","E"] (["+", "-"])? <PARTE_ENTERA> > }
+
+SKIP : { <["\t"," ","\r","\n"]> }
+SKIP : { <"#" (~["\n"])* > }
+
+/* 
+  Programa → { DeclaracionesConSeparador ListaInstrucciones }
+  Programa.a = prog(DeclaracionesConSeparador.a, ListaInstrucciones.a)
+*/
+Object Programa() :
+{ Object dcs, lis; }
+{
+    "{" 
+         dcs = DeclaracionesConSeparador() 
+         lis = ListaInstrucciones() 
+    "}" { return sem.prog(dcs, lis); }
+}
+
+/*
+  DeclaracionesConSeparador → Declaraciones && 
+       DeclaracionesConSeparador.a = declaraciones_con_separador(Declaraciones.a)
+  DeclaracionesConSeparador → ε 
+       DeclaracionesConSeparador.a = sin_declaraciones()
+*/
+Object DeclaracionesConSeparador() :
+{ Object decs; }
+{
+    { decs = Declaraciones(); } "&&" { return sem.declaraciones_con_separador(decs); }
+|   { return sem.sin_declaraciones(); }
+}
+
+/*
+  Declaraciones → Declaración Declaraciones’
+     Declaraciones’.ah = una_declaracion(Declaración.a)
+     Declaraciones.a = Declaraciones’.a
+*/
+Object Declaraciones() :
+{ Object dec; Object decs; Object temp; }
+{
+    dec = Declaracion() { temp = sem.una_declaracion(dec); }
+    decs = DeclaracionesPrima(temp) { return decs; }
+}
+
+/*
+  Declaraciones’ → ; Declaración Declaraciones’
+     Declaraciones’1.ah = muchas_declaraciones(Declaraciones’0.ah, Declaración.a)
+     Declaraciones’0.a = Declaraciones’1.a
+  Declaraciones’ → ε 
+     Declaraciones’.a = Declaraciones’.ah
+*/
+Object DeclaracionesPrima(Object ah) :
+{ Object dec; Object res; }
+{
+    ";" dec = Declaracion() { Object newAh = sem.muchas_declaraciones(ah, dec); }
+         res = DeclaracionesPrima(newAh) { return res; }
+|   { return ah; }
+}
+
+/*
+  Declaración → Tipo0 identificador
+     Declaración.a = declaracion_tipo(Tipo0.a, identificador.lex)
+  Declaración → type Tipo0 identificador
+     Declaración.a = declaracion_type(Tipo0.a, identificador.lex)       
+  Declaración → proc identificador ( ListaParametros ) Programa
+     Declaración.a = declaracion_proc(identificador.lex, ListaParametros.a, Programa.a)
+*/
+Object Declaracion() :
+{ Token id; Object tipo, params, prog; }
+{
+    // Primer alternativa: Tipo0 identificador
+    { tipo = Tipo0(); } id = <IDEN> { return sem.declaracion_tipo(tipo, id.image); }
+|   // Segunda: type Tipo0 identificador
+    <TYPE> { tipo = Tipo0(); } id = <IDEN> { return sem.declaracion_type(tipo, id.image); }
+|   // Tercera: proc identificador ( ListaParametros ) Programa
+    <PROC> id = <IDEN> "(" params = ListaParametros() ")" prog = Programa() { 
+         return sem.declaracion_proc(id.image, params, prog); 
+    }
+}
+
+/*
+  Tipo0 → Tipo1 Tipo0’
+     Tipo0’.ah = Tipo1.a
+     Tipo0.a = Tipo0’.a
+*/
+Object Tipo0() :
+{ Object t1; }
+{
+    t1 = Tipo1() { return Tipo0Prima(t1); }
+}
+
+/*
+  Tipo0’ → [literalEntero] Tipo0’
+     Tipo0’1.ah = tipo_array(Tipo0’0.ah, literalEntero.lex)
+     Tipo0’0.a = Tipo0’1.a
+  Tipo0’ → ε 
+     Tipo0’.a = Tipo0’.ah
+*/
+Object Tipo0Prima(Object ah) :
+{ Token lit; Object res; }
+{
+    "[" lit = <LIT_ENT> "]" { Object newAh = sem.tipo_array(ah, lit.image); }
+         res = Tipo0Prima(newAh) { return res; }
+|   { return ah; }
+}
+
+/*
+  Tipo1 → ^Tipo1
+     Tipo1.a = tipo_puntero(Tipo1.a)
+  Tipo1 → Tipo2
+     Tipo1.a = Tipo2.a
+*/
+Object Tipo1() :
+{ Object res; }
+{
+    "^" { res = Tipo1(); return sem.tipo_puntero(res); }
+|   { return Tipo2(); }
+}
+
+/*
+  Tipo2 → int 
+     Tipo2.a = tipo_int()
+  Tipo2 → real 
+     Tipo2.a = tipo_real()
+  Tipo2 → bool 
+     Tipo2.a = tipo_bool()
+  Tipo2 → string 
+     Tipo2.a = tipo_string()
+  Tipo2 → struct { Campos } 
+     Tipo2.a = tipo_struct(Campos.a)
+  Tipo2 → identificador 
+     Tipo2.a = tipo_iden(identificador.lex)
+*/
+Object Tipo2() :
+{ Token t; Object campos; }
+{
+    <INT>    { return sem.tipo_int(); }
+|   <REAL>   { return sem.tipo_real(); }
+|   <BOOL>   { return sem.tipo_bool(); }
+|   <STRING> { return sem.tipo_string(); }
+|   <STRUCT> "{" campos = Campos() "}" { return sem.tipo_struct(campos); }
+|   t = <IDEN> { return sem.tipo_iden(t.image); }
+}
+
+/*
+  Campos → Declaración Campos’
+     Campos’.ah = un_campo(Declaración.a)
+     Campos.a = Campos’.a
+*/
+Object Campos() :
+{ Object dec; Object cp; Object temp; }
+{
+    dec = Declaracion() { temp = sem.un_campo(dec); }
+    cp = CamposPrima(temp) { return cp; }
+}
+
+/*
+  Campos’ → , Declaración Campos’
+     Campos’1.ah = muchos_campos(Campos’0.ah, Declaración.a)
+     Campos’0.a = Campos’1.a
+  Campos’ → ε 
+     Campos’.a = Campos’.ah 
+*/
+Object CamposPrima(Object ah) :
+{ Object dec; Object res; }
+{
+    "," dec = Declaracion() { Object newAh = sem.muchos_campos(ah, dec); }
+         res = CamposPrima(newAh) { return res; }
+|   { return ah; }
+}
+
+/*
+  ListaParametros → Parametros
+     ListaParametros.a = lista_parametros(Parametros.a) 
+  ListaParametros → ε
+     ListaParametros.a = sin_parametros()
+*/
+Object ListaParametros() :
+{ Object params; }
+{
+    params = Parametros() { return sem.lista_parametros(params); }
+|   { return sem.sin_parametros(); }
+}
+
+/*
+  Parametros → Parametro Parametros’
+     Parametros’.ah = un_parametro(Parametro.a) 
+     Parametros.a = Parametros’.a
+*/
+Object Parametros() :
+{ Object param, params; Object temp; }
+{
+    param = Parametro() { temp = sem.un_parametro(param); }
+    params = ParametrosPrima(temp) { return params; }
+}
+
+/*
+  Parametros’ → , Parametro Parametros’
+     Parametros’1.ah = muchos_parametros(Parametros’0.ah, Parametro.a) 
+     Parametros’0.a = Parametros’1.a
+  Parametros’ → ε
+     Parametros’.a = Parametros’.ah 
+*/
+Object ParametrosPrima(Object ah) :
+{ Object param, res; }
+{
+    "," param = Parametro() { Object newAh = sem.muchos_parametros(ah, param); }
+         res = ParametrosPrima(newAh) { return res; }
+|   { return ah; }
+}
+
+/*
+  Parametro → Tipo0 Parametro’
+     Parametro’.ah = Tipo0.a
+     Parametro.a = Parametro’.a
+*/
+Object Parametro() :
+{ Object tipo; }
+{
+    tipo = Tipo0() { return ParametroPrima(tipo); }
+}
+
+/*
+  Parametro’ → identificador
+     Parametro’.a = parametro(Parametro’.ah, identificador.lex)
+  Parametro’ → & identificador
+     Parametro’.a = parametro_referencia(Parametro’.ah, identificador.lex)
+  Parametro’ → ε
+     Parametro’.a = Parametro’.ah
+*/
+Object ParametroPrima(Object ah) :
+{ Token id; }
+{
+    id = <IDEN> { return sem.parametro(ah, id.image); }
+|   "&" id = <IDEN> { return sem.parametro_referencia(ah, id.image); }
+|   { return ah; }
+}
+
+/*
+  ListaInstrucciones → Instrucciones
+     ListaInstrucciones.a = lista_instrucciones(Instrucciones.a)  
+  ListaInstrucciones → ε
+     ListaInstrucciones.a = sin_instrucciones() 
+*/
+Object ListaInstrucciones() :
+{ Object insts; }
+{
+    insts = Instrucciones() { return sem.lista_instrucciones(insts); }
+|   { return sem.sin_instrucciones(); }
+}
+
+/*
+  Instrucciones → Instrucción Instrucciones’
+     Instrucciones’.ah = una_instruccion(Instrucción.a)  
+     Instrucciones.a = Instrucciones’.a
+  Instrucciones’ → ; Instrucción Instrucciones’
+     Instrucciones’1.ah = muchas_instrucciones(Instrucciones’0.ah, Instrucción.a) 
+     Instrucciones’0.a = Instrucciones’1.a
+  Instrucciones’ → ε
+     Instrucciones’.a = Instrucciones’.ah  
+*/
+Object Instrucciones() :
+{ Object inst, insts; Object temp; }
+{
+    inst = Instruccion() { temp = sem.una_instruccion(inst); }
+    insts = InstruccionesPrima(temp) { return insts; }
+}
+
+Object InstruccionesPrima(Object ah) :
+{ Object inst, res; }
+{
+    ";" inst = Instruccion() { Object newAh = sem.muchas_instrucciones(ah, inst); }
+         res = InstruccionesPrima(newAh) { return res; }
+|   { return ah; }
+}
+
+/*
+  Instrucción → eval ExpresionAsignacion
+     Instrucción.a = instruccion_eval(ExpresionAsignacion.a)  
+  Instrucción → if ExpresionAsignacion Programa ElseOpt
+     Instrucción.a = instruccion_if(ExpresionAsignacion.a, Programa.a, ElseOpt.a)                 
+  Instrucción → while ExpresionAsignacion Programa
+     Instrucción.a = instruccion_while(ExpresionAsignacion.a, Programa.a)                          
+  Instrucción → read ExpresionAsignacion
+     Instrucción.a = instruccion_read(ExpresionAsignacion.a)                                 
+  Instrucción → write ExpresionAsignacion
+     Instrucción.a = instruccion_write(ExpresionAsignacion.a)                                  
+  Instrucción → nl
+     Instrucción.a = instruccion_nl()                                                  
+  Instrucción → new ExpresionAsignacion
+     Instrucción.a = instruccion_new(ExpresionAsignacion.a)                                       
+  Instrucción → delete ExpresionAsignacion
+     Instrucción.a = instruccion_delete(ExpresionAsignacion.a)                                 
+  Instrucción → call identificador ( ListaArgumentos )
+     Instrucción.a = instruccion_call(identificador.lex, ListaArgumentos.a)       
+  Instrucción → Programa
+     Instrucción.a = instruccion_programa(Programa.a) 
+*/
+Object Instruccion() :
+{ Token id; Object expAs, prog, args; }
+{
+    <EVAL> expAs = ExpresionAsignacion() { return sem.instruccion_eval(expAs); }
+|   <IF> expAs = ExpresionAsignacion() prog = Programa() { 
+         Object elseOpt = ElseOpt(); 
+         return sem.instruccion_if(expAs, prog, elseOpt);
+    }
+|   <WHILE> expAs = ExpresionAsignacion() prog = Programa() { return sem.instruccion_while(expAs, prog); }
+|   <READ> expAs = ExpresionAsignacion() { return sem.instruccion_read(expAs); }
+|   <WRITE> expAs = ExpresionAsignacion() { return sem.instruccion_write(expAs); }
+|   <NL> { return sem.instruccion_nl(); }
+|   <NEW> expAs = ExpresionAsignacion() { return sem.instruccion_new(expAs); }
+|   <DELETE> expAs = ExpresionAsignacion() { return sem.instruccion_delete(expAs); }
+|   <CALL> id = <IDEN> "(" args = ListaArgumentos() ")" { return sem.instruccion_call(id.image, args); }
+|   { Object p = Programa(); return sem.instruccion_programa(p); }
+}
+
+/*
+  ElseOpt → else Programa
+     ElseOpt.a = else_opt_else(Programa.a)  
+  ElseOpt → ε
+     ElseOpt.a = else_opt_vacio()  
+*/
+Object ElseOpt() :
+{ Object p; }
+{
+    <ELSE> p = Programa() { return sem.else_opt_else(p); }
+|   { return sem.else_opt_vacio(); }
+}
+
+/*
+  ListaArgumentos → Argumentos
+     ListaArgumentos.a = lista_argumentos(Argumentos.a) 
+  ListaArgumentos → ε
+     ListaArgumentos.a = sin_argumentos() 
+*/
+Object ListaArgumentos() :
+{ Object args; }
+{
+    args = Argumentos() { return sem.lista_argumentos(args); }
+|   { return sem.sin_argumentos(); }
+}
+
+/*
+  Argumentos → ExpresionAsignacion Argumentos’
+     Argumentos’.ah = un_argumento(ExpresionAsignacion.a)  
+     Argumentos.a = Argumentos’.a
+  Argumentos’ → , ExpresionAsignacion Argumentos’
+     Argumentos’1.ah = muchos_argumentos(Argumentos’0.ah, ExpresionAsignacion.a)
+     Argumentos’0.a = Argumentos’1.a
+  Argumentos’ → ε
+     Argumentos’.a = Argumentos’.ah
+*/
+Object Argumentos() :
+{ Object exp, args; Object temp; }
+{
+    exp = ExpresionAsignacion() { temp = sem.un_argumento(exp); }
+    args = ArgumentosPrima(temp) { return args; }
+}
+
+Object ArgumentosPrima(Object ah) :
+{ Object exp, res; }
+{
+    "," exp = ExpresionAsignacion() { Object newAh = sem.muchos_argumentos(ah, exp); }
+         res = ArgumentosPrima(newAh) { return res; }
+|   { return ah; }
+}
+
+/*
+  ExpresionAsignacion → ExpresionRelacional ExpAsign’
+     ExpresionAsignacion.a = ExpAsign’.a
+  ExpAsign’ → = ExpresionAsignacion
+     ExpAsign’.a = expresion_asignacion(ExpAsign’.ah, ExpresionAsignacion.a)
+  ExpAsign’ → ε  
+     ExpAsign’.a = ExpAsign’.ah
+*/
+Object ExpresionAsignacion() :
+{ Object er; }
+{
+    er = ExpresionRelacional() { return ExpAsignPrima(er); }
+}
+
+Object ExpAsignPrima(Object ah) :
+{ Object ea; }
+{
+    "=" ea = ExpresionAsignacion() { return sem.expresion_asignacion(ah, ea); }
+|   { return ah; }
+}
+
+/*
+  ExpresionRelacional → ExpresionAditiva ExpRel’
+     ExpresionRelacional.a = ExpRel’.a
+  ExpRel’ → OperadorRelacional ExpresionAditiva ExpRel’  
+     ExpRel’1.ah = mkop(OperadorRelacional.op, ExpRel’0.ah, ExpresionAditiva.a) 
+     ExpRel’0.a = ExpRel’1.a
+  ExpRel’ → ε 
+     ExpRel’.a = ExpRel’.ah  
+*/
+Object ExpresionRelacional() :
+{ Object e; }
+{
+    e = ExpresionAditiva() { return ExpRelPrima(e); }
+}
+
+Object ExpRelPrima(Object ah) :
+{ Object e; String op; }
+{
+    op = OperadorRelacional() e = ExpresionAditiva() { return ExpRelPrima(sem.mkop(op, ah, e)); }
+|   { return ah; }
+}
+
+/*
+  ExpresionAditiva →  ExpresionLogica ExpAdit’ ExpAdit’’ 
+     ExpAdit’.ah = ExpresionLogica.a
+     ExpresionAditiva.a = ExpAdit’’.a
+  ExpAdit’’ → + ExpresionLogica ExpAdit’’ 
+     ExpAdit’’1.ah = mkop("+",ExpAdit’’0.ah,ExpresionLogica.a)
+     ExpAdit’’0.a = ExpAdit’’1.a
+  ExpAdit’’ →  ε  
+     ExpAdit’’.a = ExpAdit’’.ah
+  ExpAdit’ → - ExpresionLogica  
+     ExpAdit’.a = mkop("-",ExpAdit’.ah,ExpresionLogica.a)
+  ExpAdit’ → ε  
+     ExpAdit’.a = ExpAdit’.ah
+*/
+Object ExpresionAditiva() :
+{ Object eLog; Object temp; }
+{
+    eLog = ExpresionLogica() { Object t = ExpAditPrima(eLog); return ExpAditPrimaPrima(t); }
+}
+
+Object ExpAditPrima(Object ah) :
+{ Object eLog; }
+{
+    "-" eLog = ExpresionLogica() { return sem.mkop("-", ah, eLog); }
+|   { return ah; }
+}
+
+Object ExpAditPrimaPrima(Object ah) :
+{ Object eLog; }
+{
+    "+" eLog = ExpresionLogica() { return ExpAditPrimaPrima(sem.mkop("+", ah, eLog)); }
+|   { return ah; }
+}
+
+/*
+  ExpresionLogica → ExpresionMultiplicativa ExpLogica’
+     ExpLogica’.ah = ExpresionMultiplicativa.a
+     ExpresionLogica.a = ExpLogica’.a
+  ExpLogica’ → and ExpresionLogica  
+     ExpLogica’.a = mkop("and", ExpLogica’.ah, ExpresionLogica.a)
+  ExpLogica’ → or ExpresionMultiplicativa  
+     ExpLogica’.a = mkop("or", ExpLogica’.ah, ExpresionMultiplicativa.a)
+  ExpLogica’ → ε  
+     ExpLogica’.a = ExpLogica’.ah  
+*/
+Object ExpresionLogica() :
+{ Object eMul; }
+{
+    eMul = ExpresionMultiplicativa() { return ExpLogicaPrima(eMul); }
+}
+
+Object ExpLogicaPrima(Object ah) :
+{ Object e; }
+{
+    <AND> e = ExpresionLogica() { return ExpLogicaPrima(sem.mkop("and", ah, e)); }
+|   <OR> e = ExpresionMultiplicativa() { return ExpLogicaPrima(sem.mkop("or", ah, e)); }
+|   { return ah; }
+}
+
+/*
+  ExpresionMultiplicativa → ExpresionUnaria ExpMult’
+     ExpMult’.ah = ExpresionUnaria.a
+     ExpresionMultiplicativa.a = ExpMult’.a
+  ExpMult’ → OperadorMultiplicativo ExpresionUnaria ExpMult’  
+     ExpMult’1.ah = mkop(OperadorMultiplicativo, ExpMult’0.ah, ExpresionUnaria.a) 
+     ExpMult’0.a = ExpMult’1.a
+  ExpMult’ → ε  
+     ExpMult’.a = ExpMult’.ah  
+*/
+Object ExpresionMultiplicativa() :
+{ Object eUn; }
+{
+    eUn = ExpresionUnaria() { return ExpMultPrima(eUn); }
+}
+
+Object ExpMultPrima(Object ah) :
+{ Object eUn; String op; }
+{
+    op = OperadorMultiplicativo() eUn = ExpresionUnaria() { return ExpMultPrima(sem.mkop(op, ah, eUn)); }
+|   { return ah; }
+}
+
+/*
+  ExpresionUnaria → OperadorUnario ExpresionUnaria
+     ExpresionUnaria.a = mkop(OperadorUnario, ExpresionUnaria.a)
+  ExpresionUnaria → ExpresionAcceso
+     ExpresionUnaria.a = ExpresionAcceso.a
+*/
+Object ExpresionUnaria() :
+{ Object e; String op; }
+{
+    op = OperadorUnario() e = ExpresionUnaria() { return sem.mkop(op, e); }
+|   { return ExpresionAcceso(); }
+}
+
+/*
+  ExpresionAcceso → Factor ExpAcceso’
+     ExpAcceso’.ah = Factor.a
+     ExpresionAcceso.a = ExpAcceso’.a
+*/
+Object ExpresionAcceso() :
+{ Object f; }
+{
+    f = Factor() { return ExpAccesoPrima(f); }
+}
+
+/*
+  ExpAcceso’ → [ ExpresionAsignacion ] ExpAcceso’
+     ExpAcceso’1.ah = expresion_acceso_array(ExpAcceso’.ah, ExpresionAsignacion.a)
+     ExpAcceso’0.a = ExpAcceso’1.a
+  ExpAcceso’ → . identificador ExpAcceso’
+     ExpAcceso’1.ah = expresion_acceso_punto(ExpAcceso’.ah, identificador.lex)
+     ExpAcceso’0.a = ExpAcceso’1.a
+  ExpAcceso’ → ^ ExpAcceso’
+     ExpAcceso’1.ah = expresion_acceso_puntero(ExpAcceso’.ah)
+     ExpAcceso’0.a = ExpAcceso’1.a
+  ExpAcceso’ → ε
+     ExpAcceso’.a = ExpAcceso’.ah
+*/
+Object ExpAccesoPrima(Object ah) :
+{ Object e; Token id; }
+{
+    "[" e = ExpresionAsignacion() "]" { return ExpAccesoPrima(sem.expresion_acceso_array(ah, e)); }
+|   "." id = <IDEN> { return ExpAccesoPrima(sem.expresion_acceso_punto(ah, id.image)); }
+|   "^" { return ExpAccesoPrima(sem.expresion_acceso_puntero(ah)); }
+|   { return ah; }
+}
+
+/*
+  Factor → ( ExpresionAsignacion )
+     Factor.a = ExpresionAsignacion.a                   
+  Factor → LiteralEntero
+     Factor.a = factor_literal_entero(LiteralEntero.lex)     
+  Factor → LiteralReal
+     Factor.a = factor_literal_real(LiteralReal.lex)
+  Factor → LiteralBool
+     Factor.a = factor_literal_bool(Literal)
+  Factor → LiteralCadena
+     Factor.a = factor_literal_cadena(LiteralCadena.lex)   
+  Factor → null
+     Factor.a = factor_null()                          
+  Factor → identificador
+     Factor.a = factor_identificador(identificador.lex)
+*/
+Object Factor() :
+{ Token t; Object e; }
+{
+    "(" e = ExpresionAsignacion() ")" { return e; }
+|   t = <LIT_ENT> { return sem.factor_literal_entero(t.image); }
+|   t = <LIT_REAL> { return sem.factor_literal_real(t.image); }
+|   t = <TRUE> { return sem.factor_literal_bool(t.image); }
+|   t = <LIT_CADENA> { return sem.factor_literal_cadena(t.image); }
+|   <NULL> { return sem.factor_null(); }
+|   t = <IDEN> { return sem.factor_identificador(t.image); }
+}
+
+/*
+  OperadorMultiplicativo → *
+     OperadorMultiplicativo.op = "*"
+  OperadorMultiplicativo → /
+     OperadorMultiplicativo.op = "/"
+*/
+String OperadorMultiplicativo() :
+{}
+{
+    "*" { return "*"; }
+|   "/" { return "/"; }
+}
+
+/*
+  OperadorUnario → not
+     OperadorUnario.op = "not"
+  OperadorUnario →  -
+     OperadorUnario.op = "-"
+*/
+String OperadorUnario() :
+{}
+{
+    <NOT> { return "not"; }
+|   "-" { return "-"; }
+}
+
+/*
+  OperadorRelacional → <
+     OperadorRelacional.op = "<" 
+  OperadorRelacional → >
+     OperadorRelacional.op = ">"   
+  OperadorRelacional → <=
+     OperadorRelacional.op = "<="  
+  OperadorRelacional → >=
+     OperadorRelacional.op = ">="  
+  OperadorRelacional → ==
+     OperadorRelacional.op = "==" 
+  OperadorRelacional → !=
+     OperadorRelacional.op = "!="  
+*/
+String OperadorRelacional() :
+{}
+{
+    "<"  { return "<"; }
+|   ">"  { return ">"; }
+|   "<=" { return "<="; }
+|   ">=" { return ">="; }
+|   "==" { return "=="; }
+|   "!=" { return "!="; }
