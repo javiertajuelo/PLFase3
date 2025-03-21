@@ -1,0 +1,397 @@
+options  {
+  STATIC=false;
+  DEBUG_PARSER=true;
+}  
+PARSER_BEGIN(ConstructorASTsTiny)
+package c_ast_descendente;
+import asint.ClaseSemanticaEval;
+import asint.SintaxisAbstractaEval.*; 
+import c_ast_ascendente.UnidadLexica.StringLocalizado;
+
+public class ConstructorASTsTiny {
+    private ClaseSemanticaEval sem = new ClaseSemanticaEval();
+}
+PARSER_END(ConstructorASTsTiny)
+
+TOKEN : { <IF: ["i","I"]["f","F"]> }
+TOKEN : { <ELSE: ["e","E"]["l","L"]["s","S"]["e","E"]> }
+TOKEN : { <WHILE: ["w","W"]["h","H"]["i","I"]["l","L"]["e","E"]> }
+TOKEN : { <READ: ["r","R"]["e","E"]["a","A"]["d","D"]> }
+TOKEN : { <WRITE: ["w","W"]["r","R"]["i","I"]["t","T"]["e","E"]> }
+TOKEN : { <NEW: ["n","N"]["e","E"]["w","W"]> }
+TOKEN : { <DELETE: ["d","D"]["e","E"]["l","L"]["e","E"]["t","T"]["e","E"]> }
+TOKEN : { <CALL: ["c","C"]["a","A"]["l","L"]["l","L"]> }
+TOKEN : { <NL: ["n","N"]["l","L"]> }
+TOKEN : { <TRUE: ["t","T"]["r","R"]["u","U"]["e","E"]> }
+TOKEN : { <FALSE: ["f","F"]["a","A"]["l","L"]["s","S"]["e","E"]> }
+TOKEN : { <NULL: ["n","N"]["u","U"]["l","L"]["l","L"]> }
+TOKEN : { <STRUCT: ["s","S"]["t","T"]["r","R"]["u","U"]["c","C"]["t","T"]> }
+TOKEN : { <PROC: ["p","P"]["r","R"]["o","O"]["c","C"]> }
+TOKEN : { <TYPE: ["t","T"]["y","Y"]["p","P"]["e","E"]> }
+TOKEN : { <EVAL: "@" > }
+TOKEN : { <AND: ["a","A"]["n","N"]["d","D"]> }
+TOKEN : { <OR: ["o","O"]["r","R"]> }
+TOKEN : { <NOT: ["n","N"]["o","O"]["t","T"]> }
+TOKEN : { <INT: ["i","I"]["n","N"]["t","T"]> }
+TOKEN : { <REAL: ["r","R"]["e","E"]["a","A"]["l","L"]> }
+TOKEN : { <BOOL: ["b","B"]["o","O"]["o","O"]["l","L"]> }
+TOKEN : { <STRING: ["s","S"]["t","T"]["r","R"]["i","I"]["n","N"]["g","G"]> }
+TOKEN : { <IDEN: (<LETRA> | "_") (<LETRA> | <DIGITO> | "_")* > }
+TOKEN : { <LIT_ENT: (["+", "-"])? <PARTE_ENTERA> > }
+TOKEN : { <LIT_REAL: (["+", "-"])? <PARTE_ENTERA> ("." <PARTE_DECIMAL> (<EXPONENTE>)? | "." <PARTE_DECIMAL> | <EXPONENTE>) > }
+TOKEN : { <LIT_CADENA: "\"" (~["\""])* "\"" > }
+TOKEN : { <#LETRA: ["a"-"z","A"-"Z"]> }
+TOKEN : { <#DIGITO_POSITIVO: ["1"-"9"]> }
+TOKEN : { <#DIGITO: <DIGITO_POSITIVO> | "0"> }
+TOKEN : { <#PARTE_ENTERA: <DIGITO_POSITIVO> (<DIGITO>)* | "0"> }
+TOKEN : { <#PARTE_DECIMAL: (<DIGITO>)* <DIGITO_POSITIVO> | "0"> }
+TOKEN : { <#EXPONENTE: ["e","E"] (["+", "-"])? <PARTE_ENTERA> > }
+
+SKIP : { <["\t"," ","\r","\n"]> }
+SKIP : { <"#" (~["\n"])* > }
+
+
+Prog analiza() :
+{Prog prog;}
+{
+prog = Programa() <EOF>
+{return prog;}
+}
+
+Prog Programa() :
+{ DeclaracionesConSep dcs; Insts lis; }
+{
+    "{" 
+         dcs = DeclaracionesConSeparador() 
+         lis = ListaInstrucciones() 
+    "}" { return sem.prog(dcs, lis); }
+}
+
+
+DeclaracionesConSep DeclaracionesConSeparador() :
+{ LDecs decs; }
+{
+     decs = Declaraciones() "&&" { return sem.declaraciones_con_separador(decs); }
+	|   { return sem.sin_declaraciones(); }
+}
+
+
+LDecs Declaraciones() :
+{ Declaracion dec; LDecs decs; }
+{
+    dec = Declaracion() decs = DeclaracionesPrima(sem.una_dec(dec)) { return decs; }
+}
+
+
+LDecs DeclaracionesPrima(LDecs ah) :
+{ Declaracion dec; LDecs decs; }
+{
+    ";" dec = Declaracion() decs = DeclaracionesPrima(sem.muchas_decs(ah, dec)) { return decs; }
+	|   { return ah; }
+}
+
+
+Declaracion Declaracion() :
+{ Token id; Tipo tipo; Params params; Prog prog; }
+{
+	     <TYPE> tipo = Tipo0() id = <IDEN> { return (Declaracion) sem.declaracion_type(tipo, id.image).ponFila(id.beginLine).ponCol(id.beginColumn); }
+	|    <PROC> id = <IDEN> "(" params = ListaParametros() ")" prog = Programa() { return (Declaracion) sem.declaracion_proc(id.image, params, prog).ponFila(id.beginLine).ponCol(id.beginColumn); }
+    |    tipo = Tipo0() id = <IDEN> { return (Declaracion) sem.declaracion_tipo(tipo, id.image).ponFila(id.beginLine).ponCol(id.beginColumn); }
+    
+}
+
+Tipo Tipo0() :
+{ Tipo t1; Tipo t2; }
+{
+    t1 = Tipo1() t2 = Tipo0Prima(t1){ return t2; }
+}
+
+
+Tipo Tipo0Prima(Tipo ah) :
+{ Token lit; Tipo res;}
+{
+    "[" lit = <LIT_ENT> "]"  res = Tipo0Prima(sem.tipo_array(ah, lit.image)) { return  Tipo0Prima((Tipo) sem.tipo_array(ah, lit.image).ponFila(lit.beginLine).ponCol(lit.beginColumn)); }
+|   { return ah; }
+}
+
+
+Tipo Tipo1() :
+{ Tipo res1; Tipo res2; }
+{
+    "^" res1 = Tipo1() { return sem.tipo_puntero(res1); }
+	|   res2 = Tipo2() { return res2; }
+}
+
+Tipo Tipo2() :
+{ Token t; Cmps campos; }
+{
+    <INT>    { return sem.tipo_int(); }
+|   <REAL>   { return sem.tipo_real(); }
+|   <BOOL>   { return sem.tipo_bool(); }
+|   <STRING> { return sem.tipo_string(); }
+|   <STRUCT> "{" campos = Campos() "}" { return sem.tipo_struct(campos); }
+|   t = <IDEN> { return (Tipo) sem.tipo_iden(t.image).ponFila(t.beginLine).ponCol(t.beginColumn); }
+}
+
+
+Cmps Campos() :
+{ Declaracion dec; Cmps cp;}
+{
+    dec = Declaracion() cp = CamposPrima(sem.un_campo(dec)) { return cp; }
+}
+
+
+Cmps CamposPrima(Cmps ah) :
+{ Declaracion dec; Cmps res; }
+{
+    "," dec = Declaracion() res = CamposPrima(sem.muchos_campos(ah, dec)) { return res; }
+	|   { return ah; }
+}
+
+
+Params ListaParametros() :
+{ LParam params; }
+{
+    params = Parametros() { return sem.lista_parametros(params); }
+	|   { return sem.sin_parametros(); }
+}
+
+
+LParam Parametros() :
+{ Tipo param; LParam params; }
+{
+    param = Parametro() params = ParametrosPrima(sem.un_parametro(param)) { return params; }
+}
+
+LParam ParametrosPrima(LParam ah) :
+{ Tipo param; LParam params; }
+{
+    "," param = Parametro() params = ParametrosPrima(sem.muchos_parametros(ah, param)) { return params; }
+	|   { return ah; }
+}
+
+Tipo Parametro() :
+{Tipo t; Tipo t2; }
+{
+    t = Tipo0() t2 = ParametroPrima(t) { return t2; }
+}
+
+
+Tipo ParametroPrima(Tipo ah) :
+{ Token id; }
+{
+    id = <IDEN> { return (Tipo) sem.parametro(ah, id.image).ponFila(id.beginLine).ponCol(id.beginColumn); }
+|   "&" id = <IDEN> { return (Tipo) sem.parametro_referencia(ah, id.image).ponFila(id.beginLine).ponCol(id.beginColumn); }
+|   { return ah; }
+}
+
+
+Insts ListaInstrucciones() :
+{ LIns insts; }
+{
+    insts = Instrucciones() { return sem.lista_instrucciones(insts); }
+	|  { return sem.sin_instrucciones(); }
+}
+
+LIns Instrucciones() :
+{ Instruccion inst; LIns insts;}
+{
+    inst = Instruccion() insts = InstruccionesPrima(sem.una_instruccion(inst)) { return insts; }
+}
+
+LIns InstruccionesPrima(LIns ah) :
+{ Instruccion inst; LIns insts; }
+{
+    ";" inst = Instruccion() insts = InstruccionesPrima(sem.muchas_instrucciones(ah, inst)) { return insts; }
+|   { return ah; }
+}
+
+
+Instruccion Instruccion() :
+{ Token id; Expresion expAs; Prog prog; Argus args; Else e; }
+{
+    <EVAL> expAs = ExpresionAsignacion() { return sem.instruccion_eval(expAs); }
+|   <IF> expAs = ExpresionAsignacion() prog = Programa() e = ElseOpt() { 
+         return sem.instruccion_if(expAs, prog, e);
+    }
+|   <WHILE> expAs = ExpresionAsignacion() prog = Programa() { return sem.instruccion_while(expAs, prog); }
+|   <READ> expAs = ExpresionAsignacion() { return sem.instruccion_read(expAs); }
+|   <WRITE> expAs = ExpresionAsignacion() { return sem.instruccion_write(expAs); }
+|   <NL> { return sem.instruccion_nl(); }
+|   <NEW> expAs = ExpresionAsignacion() { return sem.instruccion_new(expAs); }
+|   <DELETE> expAs = ExpresionAsignacion() { return sem.instruccion_delete(expAs); }
+|   <CALL> id = <IDEN> "(" args = ListaArgumentos() ")" { return (Instruccion) sem.instruccion_call(id.image, args).ponFila(id.beginLine).ponCol(id.beginColumn); }
+|   {return sem.instruccion_programa(Programa()); }
+}
+
+
+Else ElseOpt() :
+{ Prog p; }
+{
+    <ELSE> p = Programa() { return sem.else_opt_else(p); }
+|   { return sem.else_opt_vacio(); }
+}
+
+
+Argus ListaArgumentos() :
+{ LArgs args; }
+{
+    args = Argumentos() { return sem.lista_argumentos(args); }
+|   { return sem.sin_argumentos(); }
+}
+
+
+LArgs Argumentos() :
+{ Expresion exp; LArgs args;}
+{
+    exp = ExpresionAsignacion() args = ArgumentosPrima(sem.un_argumento(exp)) { return args; }
+}
+
+LArgs ArgumentosPrima(LArgs ah) :
+{ Expresion exp; LArgs args; }
+{
+    "," exp = ExpresionAsignacion() args = ArgumentosPrima(sem.muchos_argumentos(ah, exp)) { return args; }
+|   { return ah; }
+}
+
+
+Expresion ExpresionAsignacion() :
+{ Expresion er; Expresion e2;}
+{
+    er = ExpresionRelacional() e2 = ExpAsignPrima(er){ return e2; }
+}
+
+Expresion ExpAsignPrima(Expresion ah) :
+{ Expresion ea; }
+{
+    "=" ea = ExpresionAsignacion() { return sem.expresion_asignacion(ah, ea); }
+|   { return ah; }
+}
+
+
+Expresion ExpresionRelacional() :
+{ Expresion e; Expresion e2;}
+{
+    e = ExpresionAditiva() e2 = ExpRelPrima(e) { return e2; }
+}
+
+Expresion ExpRelPrima(Expresion ah) :
+{ Expresion e; String op; Expresion e2; }
+{
+    op = OperadorRelacional() e = ExpresionAditiva() e2 = ExpRelPrima(sem.mkop(op, ah, e)){ return e2; }
+	|   { return ah; }
+}
+
+
+Expresion ExpresionAditiva() :
+{ Expresion eLog; Expresion e1; Expresion e2; }
+{
+    eLog = ExpresionLogica() e1 = ExpAditPrima(eLog) e2 = ExpAditPrimaPrima(e1) { return e2; }
+}
+
+Expresion ExpAditPrima(Expresion ah) :
+{ Expresion eLog; }
+{
+    "-" eLog = ExpresionLogica() { return sem.mkop("-", ah, eLog); }
+|   { return ah; }
+}
+
+Expresion ExpAditPrimaPrima(Expresion ah) :
+{ Expresion eLog; Expresion e1; }
+{
+    "+" eLog = ExpresionLogica() e1 = ExpAditPrimaPrima(sem.mkop("+", ah, eLog)) { return e1; }
+|   { return ah; }
+}
+
+Expresion ExpresionLogica() :
+{ Expresion eMul; Expresion e1; }
+{
+    eMul = ExpresionMultiplicativa() e1 = ExpLogicaPrima(eMul) { return e1; }
+}
+
+Expresion ExpLogicaPrima(Expresion ah) :
+{ Expresion e; }
+{
+    <AND> e = ExpresionLogica() { return (sem.mkop("and", ah, e)); }
+|   <OR> e = ExpresionMultiplicativa() { return (sem.mkop("or", ah, ExpresionLogica())); }
+|   { return ah; }
+}
+
+
+Expresion ExpresionMultiplicativa() :
+{ Expresion eUn; Expresion e1; }
+{
+    eUn = ExpresionUnaria() e1 = ExpMultPrima(eUn) { return e1; }
+}
+
+Expresion ExpMultPrima(Expresion ah) :
+{ Expresion eUn; String op; Expresion e1;}
+{
+    op = OperadorMultiplicativo() eUn = ExpresionUnaria() e1 = ExpMultPrima(sem.mkop(op, ah, eUn)){ return e1; }
+	|   { return ah; }
+}
+
+Expresion ExpresionUnaria() :
+{ Expresion e; String op; Expresion e1;}
+{
+    op = OperadorUnario() e = ExpresionUnaria() { return sem.mkop(op, e,e); }
+	|  e1 = ExpresionAcceso() { return e1; }
+}
+
+
+Expresion ExpresionAcceso() :
+{ Expresion f; Expresion e1;}
+{
+    f = Factor() e1 = ExpAccesoPrima(f){ return e1; }
+}
+
+Expresion ExpAccesoPrima(Expresion ah) :
+{ Expresion e; Token id;Expresion e1; }
+{
+    "[" e = ExpresionAsignacion() "]" e1 = ExpAccesoPrima(sem.expresion_acceso_array(ah, e)) { return e1; }
+	|   "." id = <IDEN> e1 =  ExpAccesoPrima((Expresion)sem.expresion_acceso_punto(ah, id.image).ponFila(id.beginLine).ponCol(id.beginColumn)) { return e1; }
+	|   "^" e1 = ExpAccesoPrima(sem.expresion_acceso_puntero(ah)) { return e1; }
+	|   { return ah; }
+}
+
+
+Expresion Factor() :
+{ Token t; Expresion e; }
+{
+    "(" e = ExpresionAsignacion() ")" { return e; }
+|   t = <LIT_ENT> { return (Expresion) sem.factor_literal_entero(t.image).ponFila(t.beginLine).ponCol(t.beginColumn); }
+|   t = <LIT_REAL> { return (Expresion) sem.factor_literal_real(t.image).ponFila(t.beginLine).ponCol(t.beginColumn); }
+|   t = <FALSE> { return (Expresion) sem.factor_literal_bool(t.image).ponFila(t.beginLine).ponCol(t.beginColumn); }
+|   t = <TRUE> { return (Expresion) sem.factor_literal_bool(t.image).ponFila(t.beginLine).ponCol(t.beginColumn); }
+|   t = <LIT_CADENA> { return (Expresion) sem.factor_literal_cadena(t.image).ponFila(t.beginLine).ponCol(t.beginColumn); }
+|   <NULL> { return sem.factor_null(); }
+|   t = <IDEN> { return (Expresion) sem.factor_identificador(t.image).ponFila(t.beginLine).ponCol(t.beginColumn); }
+}
+
+
+String OperadorMultiplicativo() :
+{}
+{
+    "*" { return "*"; }
+|   "/" { return "/"; }
+|   "%" { return "%"; }
+}
+
+
+String OperadorUnario() :
+{}
+{
+    <NOT> { return "not"; }
+|   "-" { return "-"; }
+}
+
+String OperadorRelacional() :
+{}
+{
+    "<"  { return "<"; }
+|   ">"  { return ">"; }
+|   "<=" { return "<="; }
+|   ">=" { return ">="; }
+|   "==" { return "=="; }
+|   "!=" { return "!="; }
+}
