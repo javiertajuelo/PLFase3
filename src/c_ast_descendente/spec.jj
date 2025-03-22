@@ -190,7 +190,7 @@ Insts ListaInstrucciones() :
 { LIns insts; }
 {
     insts = Instrucciones() { return sem.lista_instrucciones(insts); }
-	|  { return sem.sin_instrucciones(); }
+|  { return sem.sin_instrucciones(); }
 }
 
 LIns Instrucciones() :
@@ -208,12 +208,10 @@ LIns InstruccionesPrima(LIns ah) :
 
 
 Instruccion Instruccion() :
-{ Token id; Expresion expAs; Prog prog; Argus args; Else e; }
+{ Token id; Expresion expAs; Prog prog; Argus args; Else e;Prog p; }
 {
     <EVAL> expAs = ExpresionAsignacion() { return sem.instruccion_eval(expAs); }
-|   <IF> expAs = ExpresionAsignacion() prog = Programa() e = ElseOpt() { 
-         return sem.instruccion_if(expAs, prog, e);
-    }
+|   <IF> expAs = ExpresionAsignacion() prog = Programa() e = ElseOpt() { return sem.instruccion_if(expAs, prog, e);}
 |   <WHILE> expAs = ExpresionAsignacion() prog = Programa() { return sem.instruccion_while(expAs, prog); }
 |   <READ> expAs = ExpresionAsignacion() { return sem.instruccion_read(expAs); }
 |   <WRITE> expAs = ExpresionAsignacion() { return sem.instruccion_write(expAs); }
@@ -221,7 +219,7 @@ Instruccion Instruccion() :
 |   <NEW> expAs = ExpresionAsignacion() { return sem.instruccion_new(expAs); }
 |   <DELETE> expAs = ExpresionAsignacion() { return sem.instruccion_delete(expAs); }
 |   <CALL> id = <IDEN> "(" args = ListaArgumentos() ")" { return (Instruccion) sem.instruccion_call(id.image, args).ponFila(id.beginLine).ponCol(id.beginColumn); }
-|   {return sem.instruccion_programa(Programa()); }
+|   p = Programa(){return sem.instruccion_programa(p); }
 }
 
 
@@ -313,7 +311,7 @@ Expresion ExpLogicaPrima(Expresion ah) :
 { Expresion e; }
 {
     <AND> e = ExpresionLogica() { return (sem.mkop("and", ah, e)); }
-|   <OR> e = ExpresionMultiplicativa() { return (sem.mkop("or", ah, ExpresionLogica())); }
+|   <OR> e = ExpresionMultiplicativa() { return (sem.mkop("or", ah, e)); }
 |   { return ah; }
 }
 

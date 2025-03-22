@@ -1,6 +1,6 @@
-package alex;
+package c_ast_ascendente;
 
-import errors.GestionErroresEval;
+import c_ast_ascendente.GestionErroresEval;
 
 %%
 %line
@@ -107,8 +107,6 @@ comentario = ##[^\n]*
 {bool}			{return ops.unidadBool();}
 {string}		{return ops.unidadString();}
 {null}			{return ops.unidadNull();}
-{true}			{return ops.unidadTrue();}
-{false}			{return ops.unidadFalse();}
 {proc}			{return ops.unidadProc();}
 {if}			{return ops.unidadIf();}
 {else}			{return ops.unidadElse();}

@@ -1,5 +1,6 @@
 package c_ast_ascendente;
 
+
 public class ALexOperations {
     
     
@@ -96,6 +97,10 @@ public class ALexOperations {
     public UnidadLexica unidadLitCadena() {
         return new UnidadLexica(alex.fila(), alex.columna(), ClaseLexica.LIT_CADENA, alex.lexema());
     }
+    
+    public UnidadLexica unidadLitBool() {
+        return new UnidadLexica(alex.fila(), alex.columna(), ClaseLexica.LIT_BOOLEANO, alex.lexema());
+    }
 
     public UnidadLexica unidadLlaveAp() {
         return new UnidadLexica(alex.fila(), alex.columna(), ClaseLexica.LLAVEAP, "{");
@@ -185,16 +190,9 @@ public class ALexOperations {
         return new UnidadLexica(alex.fila(), alex.columna(), ClaseLexica.REAL, "<real>");
     }
 
-    public UnidadLexica unidadTrue() {
-        return new UnidadLexica(alex.fila(), alex.columna(), ClaseLexica.TRUE, "<true>");
-    }
 
     public UnidadLexica unidadType() {
         return new UnidadLexica(alex.fila(), alex.columna(), ClaseLexica.TYPE, "<type>");
-    }
-
-    public UnidadLexica unidadFalse() {
-        return new UnidadLexica(alex.fila(), alex.columna(), ClaseLexica.FALSE, "<false>");
     }
 
     public UnidadLexica unidadWhile() {

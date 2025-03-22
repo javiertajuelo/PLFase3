@@ -13,7 +13,7 @@ public class SintaxisAbstractaEval {
         public abstract <T> T accept(Visitor<T> v);
     }
 
-    // Interfaz Visitor: se define un mÃ©todo para cada tipo de nodo.
+    // Interfaz Visitor: se define un método para cada tipo de nodo.
     public interface Visitor<T> {
         T visit(Prog n);
         T visit(Declaraciones_Con_Separador n);
@@ -95,7 +95,8 @@ public class SintaxisAbstractaEval {
             this.insts = insts;
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
-        public String toString() { return "prog(" + dcs + ", " + insts + ")"; }
+        public String toString() { return ""; }
+        //public String toString() { return "prog(" + dcs + ", " + insts + ")"; }
     }
     
     public static abstract class DeclaracionesConSep extends Nodo { }

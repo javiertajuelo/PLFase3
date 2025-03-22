@@ -3,7 +3,7 @@ import java.io.FileReader;
 
 public class Main{
    public static void main(String[] args) throws Exception {
-      ConstructorASTsTiny asint = new ConstructorASTsTiny(new FileReader("sample1d.in"));
+      ConstructorASTsTiny asint = new ConstructorASTsTinyDJ(new FileReader("sample2d.in"));
       asint.disable_tracing();
       try {
           System.out.println(asint.analiza());
@@ -13,7 +13,7 @@ public class Main{
 
       }catch(ParseException e) {
      	 System.out.println("ERROR_SINTACTICO");
-     	 System.out.println(e.getMessage());
+     	 //System.out.println(e.getMessage());
 
       }	
    }
