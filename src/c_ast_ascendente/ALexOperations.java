@@ -99,7 +99,7 @@ public class ALexOperations {
     }
     
     public UnidadLexica unidadLitBool() {
-        return new UnidadLexica(alex.fila(), alex.columna(), ClaseLexica.LIT_BOOLEANO, alex.lexema());
+        return new UnidadLexica(alex.fila(), alex.columna(), ClaseLexica.LIT_BOOLEANO, "<" +alex.lexema() + ">");
     }
 
     public UnidadLexica unidadLlaveAp() {
