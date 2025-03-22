@@ -6,23 +6,32 @@ import java.io.Reader;
 
 import c_ast_ascendente.GestionErroresEval.ErrorLexico;
 import c_ast_ascendente.GestionErroresEval.ErrorSintactico;
+import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.Symbol;
 
 public class Main {
    public static void main(String[] args) throws Exception {
-    Reader input = new InputStreamReader(new FileInputStream("sample1a.in"));
+	ComplexSymbolFactory csf = new ComplexSymbolFactory();
+    Reader input = new InputStreamReader(new FileInputStream("sample5a.in"));
     AnalizadorLexicoEval alex = new AnalizadorLexicoEval(input);
-	AnalizadorSintacticoEval asint = new AnalizadorSintacticoEvalDJ(alex);
+	AnalizadorSintacticoEval asint = new AnalizadorSintacticoEvalDJ(alex,csf);
 	 //asint.setScanner(alex);
-	 try {    
-		 System.out.println(asint.debug_parse());
-     }
+	  try {
+	         Object result = asint.debug_parse();
+	         if (result instanceof Symbol) {
+	             Symbol sym = (Symbol) result;
+	             System.out.println(sym.value);
+	         } else {
+	             System.out.println(result);
+	         }
+	      }
      catch(ErrorLexico e) {
         System.out.println("ERROR_LEXICO"); 
         
      }
      catch(ErrorSintactico e) {
         System.out.println("ERROR_SINTACTICO"); 
-    	System.out.println(e.getMessage());
+    	//System.out.println(e.getMessage());
      }catch(ClassCastException e) {}
  }
 }   
