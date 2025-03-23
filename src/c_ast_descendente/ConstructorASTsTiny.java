@@ -843,7 +843,7 @@ Expresion e; String op; Expresion e1;
       case 48:{
         op = OperadorUnario();
         e = ExpresionUnaria();
-{if ("" != null) return sem.mkop(op, e,e);}
+{if ("" != null) return sem.mkop(op, e,null);}
         break;
         }
       case TRUE:

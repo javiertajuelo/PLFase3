@@ -332,7 +332,7 @@ Expresion ExpMultPrima(Expresion ah) :
 Expresion ExpresionUnaria() :
 { Expresion e; String op; Expresion e1;}
 {
-    op = OperadorUnario() e = ExpresionUnaria() { return sem.mkop(op, e,e); }
+    op = OperadorUnario() e = ExpresionUnaria() { return sem.mkop(op, e,null); }
 	|  e1 = ExpresionAcceso() { return e1; }
 }
 
