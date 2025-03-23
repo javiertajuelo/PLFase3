@@ -13,7 +13,7 @@ public class SintaxisAbstractaEval {
         public abstract <T> T accept(Visitor<T> v);
     }
 
-    // Interfaz Visitor: se define un método para cada tipo de nodo.
+    // Interfaz Visitor: se define un mï¿½todo para cada tipo de nodo.
     public interface Visitor<T> {
         T visit(Prog n);
         T visit(Declaraciones_Con_Separador n);
@@ -87,8 +87,8 @@ public class SintaxisAbstractaEval {
     }
 
     public static class Prog extends Nodo {
-        public DeclaracionesConSep dcs;
-        public Insts insts;
+        private DeclaracionesConSep dcs;
+        private Insts insts;
         public Prog(DeclaracionesConSep dcs, Insts insts) {
             super();
             this.dcs = dcs;
@@ -96,19 +96,25 @@ public class SintaxisAbstractaEval {
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return ""; }
+        public DeclaracionesConSep dcs() {return this.dcs;}
+        public Insts inst() {return this.insts;}
         //public String toString() { return "prog(" + dcs + ", " + insts + ")"; }
     }
     
-    public static abstract class DeclaracionesConSep extends Nodo { }
+    public static abstract class DeclaracionesConSep extends Nodo {
+    	public DeclaracionesConSep() {}
+        public LDecs ldecs() {throw new UnsupportedOperationException();}
+    }
     
     public static class Declaraciones_Con_Separador extends DeclaracionesConSep {
-        public LDecs decs;
+        private LDecs decs;
         public Declaraciones_Con_Separador(LDecs decs) { 
             super();
             this.decs = decs; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "decs(" + decs + ")"; }
+        public LDecs ldecs() {return this.decs;}
     }
     
     public static class Sin_Declaraciones extends DeclaracionesConSep {
@@ -117,21 +123,29 @@ public class SintaxisAbstractaEval {
         public String toString() { return "sin_decs()"; }
     }
     
-    public static abstract class LDecs extends Nodo { }
+    public static abstract class LDecs extends Nodo { 
+    	public LDecs() {
+ 		   super();
+        }
+        public Declaracion dec() {throw new UnsupportedOperationException();}
+        public LDecs ldecs() {throw new UnsupportedOperationException();}
+    
+    }
     
     public static class Una_dec extends LDecs {
-        public Declaracion dec;
+        private Declaracion dec;
         public Una_dec(Declaracion dec) { 
             super();
             this.dec = dec; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "una_dec(" + dec + ")"; }
+        public Declaracion dec() {return this.dec;}
     }
     
     public static class Muchas_decs extends LDecs {
-        public LDecs decs;
-        public Declaracion dec;
+        private LDecs decs;
+        private Declaracion dec;
         public Muchas_decs(LDecs decs, Declaracion dec) { 
             super();
             this.decs = decs; 
@@ -139,51 +153,79 @@ public class SintaxisAbstractaEval {
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "muchas_decs(" + decs + ", " + dec + ")"; }
+        public LDecs ldecs() {return this.decs;}
+        public Declaracion dec() {return this.dec;}
     }
     
-    public static abstract class Declaracion extends Nodo { }
+    public static abstract class Declaracion extends Nodo {
+    	public Declaracion() {
+  		   super();
+         }
+         public Tipo tipo() {throw new UnsupportedOperationException();}
+         public String iden() {throw new UnsupportedOperationException();}
+         public Params params() {throw new UnsupportedOperationException();}
+         public Prog cuerpo() {throw new UnsupportedOperationException();}
+    
+    }
     
     public static class DecTipo extends Declaracion {
-        public Tipo tipo;
-        public String id;
+        private Tipo tipo;
+        private String id;
         public DecTipo(Tipo tipo, String id) { 
             this.tipo = tipo; 
             this.id = id; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "dec_tipo(" + tipo + ", " + id +"["+leeFila()+","+leeCol()+"]" + ")"; }
+        public Tipo tipo() {return this.tipo;}
+        public String iden() {return this.id;}
     }
     
     public static class DecType extends Declaracion {
-        public Tipo tipo;
-        public String id;
+        private Tipo tipo;
+        private String id;
         public DecType(Tipo tipo, String id) { 
             this.tipo = tipo; 
             this.id = id; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "dec_type(" + tipo + ", " + id +"["+leeFila()+","+leeCol()+"]"+ ")"; }
+        public Tipo tipo() {return this.tipo;}
+        public String iden() {return this.id;}
     }
     
     public static class DecProc extends Declaracion {
         public String id;
         public Params params;
         public Prog cuerpo;
+        
         public DecProc(String id, Params params, Prog cuerpo) {
             this.id = id;
             this.params = params;
             this.cuerpo = cuerpo;
         }
+        
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "dec_proc(" + id +"["+leeFila()+","+leeCol()+"]," + params + ", " + cuerpo + ")"; }
+        public String iden() {return this.id;}
+        public Params params() {return this.params;}
+        public Prog cuerpo() { return this.cuerpo;}
     }
     
    
-    public static abstract class Tipo extends Nodo { }
+    public static abstract class Tipo extends Nodo {
+    	public Tipo() {
+   		   super();
+          }
+    	public String iden() {throw new UnsupportedOperationException();}
+    	public Tipo tipo() {throw new UnsupportedOperationException();}
+        public String size() {throw new UnsupportedOperationException();}
+        public Cmps campos() {throw new UnsupportedOperationException();}
+    }
     
     public static class TipoArray extends Tipo {
-        public Tipo base;
-        public String size;
+        private Tipo base;
+        private String size;
         public TipoArray(Tipo base, String size) {
             super();
             this.base = base;
@@ -191,16 +233,19 @@ public class SintaxisAbstractaEval {
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "tipo_array(" + base + ", " + size + ")"; }
+        public Tipo tipo() {return this.base;}
+        public String size() {return this.size;}
     }
     
     public static class TipoPuntero extends Tipo {
-        public Tipo base;
+        private Tipo base;
         public TipoPuntero(Tipo base) { 
             super();
             this.base = base; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "tipo_puntero(" + base + ")"; }
+        public Tipo tipo() {return this.base;}
     }
     
     public static class TipoInt extends Tipo {
@@ -228,41 +273,48 @@ public class SintaxisAbstractaEval {
     }
     
     public static class TipoStruct extends Tipo {
-        public Cmps campos;
+        private Cmps campos;
         public TipoStruct(Cmps campos) { 
             super();
             this.campos = campos; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "tipo_struct(" + campos + ")"; }
+        public Cmps campos() {return this.campos;}
     }
     
     public static class TipoIden extends Tipo {
-        public String id;
+        private String id;
         public TipoIden(String id) { 
             super();
             this.id = id; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "tipo_iden(" + id + ")"; }
+        public String iden() {return this.id;}
     }
     
    
-    public static abstract class Cmps extends Nodo { }
+    public static abstract class Cmps extends Nodo { 
+    	public Cmps(){super();}
+    	public Declaracion dec() {throw new UnsupportedOperationException();}
+        public Cmps campos() {throw new UnsupportedOperationException();}
+    }
     
     public static class Un_campo extends Cmps {
-        public Declaracion dec;
+        private Declaracion dec;
         public Un_campo(Declaracion dec) { 
             super();
             this.dec = dec; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "un_campo(" + dec + ")"; }
+        public Declaracion dec() {return this.dec;}
     }
     
     public static class Muchos_campos extends Cmps {
-        public Cmps campos;
-        public Declaracion dec;
+        private Cmps campos;
+        private Declaracion dec;
         public Muchos_campos(Cmps campos, Declaracion dec) { 
             super();
             this.campos = campos;
@@ -270,10 +322,15 @@ public class SintaxisAbstractaEval {
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "muchos_campos(" + campos + ", " + dec + ")"; }
+        public Declaracion dec() {return this.dec;}
+        public Cmps campos() {return this.campos;}
     }
     
     
-    public static abstract class Params extends Nodo { }
+    public static abstract class Params extends Nodo {
+    	public Params() {super();}
+    	public LParam lparam() {throw new UnsupportedOperationException();}
+    }
     
     public static class ConParametros extends Params {
     	private LParam lparam;
@@ -283,6 +340,7 @@ public class SintaxisAbstractaEval {
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "con_params(" + lparam + ")"; }
+        public LParam lparam() {return this.lparam;}
     }
     
     public static class SinParametros extends Params {
@@ -291,21 +349,26 @@ public class SintaxisAbstractaEval {
         public String toString() { return "sin_parametros"; }
     }
     
-    public static abstract class LParam extends Nodo { }
+    public static abstract class LParam extends Nodo {
+    	public LParam() {super();}
+    	public LParam lparam() {throw new UnsupportedOperationException();}
+    	 public Tipo tipo() {throw new UnsupportedOperationException();}
+    }
     
     public static class Un_param extends LParam {
-        public Tipo param;
+        private Tipo param;
         public Un_param(Tipo param) { 
             super();
             this.param = param; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "un_param(" + param + ")"; }
+        public Tipo tipo() {return this.param;}
     }
     
     public static class Muchos_param extends LParam {
-        public LParam lparam;
-        public Tipo param;
+        private LParam lparam;
+        private Tipo param;
         public Muchos_param(LParam lparam, Tipo param) { 
             super();
             this.lparam = lparam;
@@ -313,14 +376,16 @@ public class SintaxisAbstractaEval {
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "muchos_param(" + lparam + ", " + param + ")"; }
+        public LParam lparam() {return this.lparam;}
+        public Tipo tipo() {return this.param;}
     }
     
     
     //public static abstract class Param extends Nodo { }
     
     public static class ParametroValor extends Tipo {
-        public Tipo tipo;
-        public String id;
+        private Tipo tipo;
+        private String id;
         public ParametroValor(Tipo tipo, String id) { 
             super();
             this.tipo = tipo; 
@@ -328,11 +393,13 @@ public class SintaxisAbstractaEval {
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "parametro(" + tipo + ", " + id + ")"; }
+        public Tipo tipo() {return this.tipo;}
+        public String iden() {return this.id;}
     }
     
     public static class ParametroReferencia extends Tipo {
-        public Tipo tipo;
-        public String id;
+        private Tipo tipo;
+        private String id;
         public ParametroReferencia(Tipo tipo, String id) { 
             super();
             this.tipo = tipo; 
@@ -340,19 +407,25 @@ public class SintaxisAbstractaEval {
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "parametro_referencia(" + tipo + ", " + id + ")"; }
+        public Tipo tipo() {return this.tipo;}
+        public String iden() {return this.id;}
     }
     
    
-    public static abstract class Insts extends Nodo { }
+    public static abstract class Insts extends Nodo { 
+    	public Insts() {super(); }
+    	public LIns insts() {throw new UnsupportedOperationException();}
+    }
     
     public static class Lista_Instrucciones extends Insts {
-        public LIns insts;
+        private LIns insts;
         public Lista_Instrucciones(LIns insts) { 
             super();
             this.insts = insts; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "lista_instrucciones" + insts; }
+        public LIns insts() {return this.insts;}
     }
     
     public static class Sin_Instrucciones extends Insts {
@@ -360,21 +433,26 @@ public class SintaxisAbstractaEval {
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "sin_instrucciones"; }
     }
-    public static abstract class LIns extends Nodo { }
+    public static abstract class LIns extends Nodo { 
+    	public LIns() {super();}
+    	public Instruccion inst() {throw new UnsupportedOperationException();}
+        public LIns insts() {throw new UnsupportedOperationException();}
+    }
 
     public static class Una_instruccion extends LIns {
-        public Instruccion inst;
+        private Instruccion inst;
         public Una_instruccion(Instruccion inst) { 
             super();
             this.inst = inst; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "un_instruccion(" + inst + ")"; }
+        public Instruccion inst() {return this.inst;}
     }
     
     public static class Muchas_instrucciones extends LIns {
-        public LIns insts;
-        public Instruccion inst;
+        private LIns insts;
+        private Instruccion inst;
         public Muchas_instrucciones(LIns insts, Instruccion inst) { 
             super();
             this.insts = insts;
@@ -382,24 +460,34 @@ public class SintaxisAbstractaEval {
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "muchas_instrucciones(" + insts + ", " + inst + ")"; }
+        public Instruccion inst() {return this.inst;}
+        public LIns insts() {return this.insts;}
     }
    
-    public static abstract class Instruccion extends Nodo { }
+    public static abstract class Instruccion extends Nodo {
+    	public Instruccion() {super();}
+    	public Expresion exp() {throw new UnsupportedOperationException();}
+    	public Prog prog() {throw new UnsupportedOperationException();}
+        public Else elseOpt() {throw new UnsupportedOperationException();}
+        public String iden() {throw new UnsupportedOperationException();}
+        public Argus args() {throw new UnsupportedOperationException();}
+    }
     
     public static class InstruccionEval extends Instruccion {
-        public Expresion exp;
+        private Expresion exp;
         public InstruccionEval(Expresion exp) { 
             super();
             this.exp = exp; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "@(" + exp + ")"; }
+        public Expresion exp() {return this.exp;}
     }
     
     public static class InstruccionIf extends Instruccion {
-        public Expresion cond;
-        public Prog thenProg;
-        public Else elseOpt;
+        private Expresion cond;
+        private Prog thenProg;
+        private Else elseOpt;
         public InstruccionIf(Expresion cond, Prog thenProg, Else elseOpt) { 
             super();
             this.cond = cond; 
@@ -408,11 +496,14 @@ public class SintaxisAbstractaEval {
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "if(" + cond + ", " + thenProg + ", " + elseOpt + ")"; }
+        public Expresion exp() {return this.cond;}
+        public Prog prog() {return this.thenProg;}
+        public Else elseOpt() {return this.elseOpt;}
     }
     
     public static class InstruccionWhile extends Instruccion {
-        public Expresion cond;
-        public Prog cuerpo;
+        private Expresion cond;
+        private Prog cuerpo;
         public InstruccionWhile(Expresion cond, Prog cuerpo) { 
             super();
             this.cond = cond; 
@@ -420,26 +511,30 @@ public class SintaxisAbstractaEval {
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "while(" + cond + ", " + cuerpo + ")"; }
+        public Expresion exp() {return this.cond;}
+        public Prog prog() {return this.cuerpo;}
     }
     
     public static class InstruccionRead extends Instruccion {
-        public Expresion exp;
+        private Expresion exp;
         public InstruccionRead(Expresion exp) { 
             super();
             this.exp = exp; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "read(" + exp + ")"; }
+        public Expresion exp() {return this.exp;}
     }
     
     public static class InstruccionWrite extends Instruccion {
-        public Expresion exp;
+        private Expresion exp;
         public InstruccionWrite(Expresion exp) { 
             super();
             this.exp = exp; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "write(" + exp + ")"; }
+        public Expresion exp() {return this.exp;}
     }
     
     public static class InstruccionNl extends Instruccion {
@@ -449,28 +544,30 @@ public class SintaxisAbstractaEval {
     }
     
     public static class InstruccionNew extends Instruccion {
-        public Expresion exp;
+        private Expresion exp;
         public InstruccionNew(Expresion exp) { 
             super();
             this.exp = exp; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "new(" + exp + ")"; }
+        public Expresion exp() {return this.exp;}
     }
     
     public static class InstruccionDelete extends Instruccion {
-        public Expresion exp;
+        private Expresion exp;
         public InstruccionDelete(Expresion exp) { 
             super();
             this.exp = exp; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "delete(" + exp + ")"; }
+        public Expresion exp() {return this.exp;}
     }
     
     public static class InstruccionCall extends Instruccion {
-        public String id;
-        public Argus args;
+        private String id;
+        private Argus args;
         public InstruccionCall(String id, Argus args) { 
             super();
             this.id = id; 
@@ -478,29 +575,36 @@ public class SintaxisAbstractaEval {
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "call(" + id + ", " + args + ")"; }
+        public String iden() {return this.id;}
+        public Argus args() {return this.args;}
     }
     
     public static class InstruccionPrograma extends Instruccion {
-        public Prog prog;
+        private Prog prog;
         public InstruccionPrograma(Prog prog) { 
             super();
             this.prog = prog; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "instruccion_programa(" + prog + ")"; }
+        public Prog prog() {return this.prog;}
     }
     
    
-    public static abstract class Else extends Nodo { }
+    public static abstract class Else extends Nodo {
+    	public Else() {super();}
+    	public Prog prog() {throw new UnsupportedOperationException();}
+    }
     
     public static class ElseOptElse extends Else {
-        public Prog prog;
+        private Prog prog;
         public ElseOptElse(Prog prog) { 
             super();
             this.prog = prog; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "else(" + prog + ")"; }
+        public Prog prog() {return this.prog;}
     }
     
     public static class ElseOptVacio extends Else {
@@ -510,16 +614,20 @@ public class SintaxisAbstractaEval {
     }
     
     
-    public static abstract class Argus extends Nodo { }
+    public static abstract class Argus extends Nodo {
+    	public Argus() {super();}
+    	public LArgs args() {throw new UnsupportedOperationException();}
+    }
     
     public static class ConArgumentos extends Argus {
-        public LArgs args;
+        private LArgs args;
         public ConArgumentos(LArgs args) { 
             super();
             this.args = args; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "lista_argumentos" + args; }
+        public LArgs args() {return this.args;}
     }
     
     public static class SinArgumentos extends Argus {
@@ -528,21 +636,26 @@ public class SintaxisAbstractaEval {
         public String toString() { return "sin_argumentos"; }
     }
     
-    public static abstract class LArgs extends Nodo { }
+    public static abstract class LArgs extends Nodo {
+    	public LArgs() {super();}
+    	public LArgs args() {throw new UnsupportedOperationException();}
+        public Expresion exp() {throw new UnsupportedOperationException();}
+    }
     
     public static class Un_arg extends LArgs {
-        public Expresion exp;
+        private Expresion exp;
         public Un_arg(Expresion exp) { 
             super();
             this.exp = exp; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "un_arg(" + exp + ")"; }
+        public Expresion exp() {return this.exp;}
     }
     
     public static class Muchos_arg extends LArgs {
-        public LArgs args;
-        public Expresion exp;
+        private LArgs args;
+        private Expresion exp;
         public Muchos_arg(LArgs args, Expresion exp) { 
             super();
             this.args = args;
@@ -550,173 +663,211 @@ public class SintaxisAbstractaEval {
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "muchos_arg(" + args + ", " + exp + ")"; }
+        public LArgs args() {return this.args;}
+        public Expresion exp() {return this.exp;}
     }
     
-    public static abstract class Expresion extends Nodo { }
+    public static abstract class Expresion extends Nodo {
+    	public Expresion() {super();}
+    	public Expresion Opn0() {throw new UnsupportedOperationException();}
+        public Expresion Opn1() {throw new UnsupportedOperationException();}
+        public String campo() {throw new UnsupportedOperationException();}
+        public String lit() {throw new UnsupportedOperationException();}
+    }
     
     public static class ExpAsignacion extends Expresion {
-        public Expresion izq, der;
+        private Expresion izq, der;
         public ExpAsignacion(Expresion izq, Expresion der) { 
             super();
             this.izq = izq; this.der = der; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "asign(" + izq + ", " + der + ")"; }
+        public Expresion Opn0() {return this.izq;}
+        public Expresion Opn1() {return this.der;}
     }
     
     public static class ExpRelMenor extends Expresion {
-        public Expresion opnd0, opnd1;
+        private Expresion opnd0, opnd1;
         public ExpRelMenor(Expresion opnd0, Expresion opnd1) { 
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "menor(" + opnd0 + ", " + opnd1 + ")"; }
+        public Expresion Opn0() {return this.opnd0;}
+        public Expresion Opn1() {return this.opnd1;}
     }
     
     public static class ExpRelMayor extends Expresion {
-        public Expresion opnd0, opnd1;
+        private Expresion opnd0, opnd1;
         public ExpRelMayor(Expresion opnd0, Expresion opnd1) { 
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "mayor(" + opnd0 + ", " + opnd1 + ")"; }
+        public Expresion Opn0() {return this.opnd0;}
+        public Expresion Opn1() {return this.opnd1;}
     }
     
     public static class ExpRelMenorIgual extends Expresion {
-        public Expresion opnd0, opnd1;
+        private Expresion opnd0, opnd1;
         public ExpRelMenorIgual(Expresion opnd0, Expresion opnd1) { 
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "menor_igual(" + opnd0 + ", " + opnd1 + ")"; }
+        public Expresion Opn0() {return this.opnd0;}
+        public Expresion Opn1() {return this.opnd1;}
     }
     
     public static class ExpRelMayorIgual extends Expresion {
-        public Expresion opnd0, opnd1;
+        private Expresion opnd0, opnd1;
         public ExpRelMayorIgual(Expresion opnd0, Expresion opnd1) { 
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "mayor_igual(" + opnd0 + ", " + opnd1 + ")"; }
+        public Expresion Opn0() {return this.opnd0;}
+        public Expresion Opn1() {return this.opnd1;}
     }
     
     public static class ExpRelIgualIgual extends Expresion {
-        public Expresion opnd0, opnd1;
+        private Expresion opnd0, opnd1;
         public ExpRelIgualIgual(Expresion opnd0, Expresion opnd1) { 
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "igual_igual(" + opnd0 + ", " + opnd1 + ")"; }
+        public Expresion Opn0() {return this.opnd0;}
+        public Expresion Opn1() {return this.opnd1;}
     }
     
     public static class ExpRelDistinto extends Expresion {
-        public Expresion opnd0, opnd1;
+        private Expresion opnd0, opnd1;
         public ExpRelDistinto(Expresion opnd0, Expresion opnd1) { 
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "distinto(" + opnd0 + ", " + opnd1 + ")"; }
+        public Expresion Opn0() {return this.opnd0;}
+        public Expresion Opn1() {return this.opnd1;}
     }
     
     public static class ExpAdicSuma extends Expresion {
-        public Expresion opnd0, opnd1;
+        private Expresion opnd0, opnd1;
         public ExpAdicSuma(Expresion opnd0, Expresion opnd1) { 
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "suma(" + opnd0 + ", " + opnd1 + ")"; }
+        public Expresion Opn0() {return this.opnd0;}
+        public Expresion Opn1() {return this.opnd1;}
     }
     
     public static class ExpAdicResta extends Expresion {
-        public Expresion opnd0, opnd1;
+        private Expresion opnd0, opnd1;
         public ExpAdicResta(Expresion opnd0, Expresion opnd1) { 
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "resta(" + opnd0 + ", " + opnd1 + ")"; }
+        public Expresion Opn0() {return this.opnd0;}
+        public Expresion Opn1() {return this.opnd1;}
     }
     
     public static class ExpLogAnd extends Expresion {
-        public Expresion opnd0, opnd1;
+        private Expresion opnd0, opnd1;
         public ExpLogAnd(Expresion opnd0, Expresion opnd1) { 
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "and(" + opnd0 + ", " + opnd1 + ")"; }
+        public Expresion Opn0() {return this.opnd0;}
+        public Expresion Opn1() {return this.opnd1;}
     }
     
     public static class ExpLogOr extends Expresion {
-        public Expresion opnd0, opnd1;
+        private Expresion opnd0, opnd1;
         public ExpLogOr(Expresion opnd0, Expresion opnd1) { 
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "or(" + opnd0 + ", " + opnd1 + ")"; }
+        public Expresion Opn0() {return this.opnd0;}
+        public Expresion Opn1() {return this.opnd1;}
     }
     
     public static class ExpMul extends Expresion {
-        public Expresion opnd0, opnd1;
+        private Expresion opnd0, opnd1;
         public ExpMul(Expresion opnd0, Expresion opnd1) { 
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "mul(" + opnd0 + ", " + opnd1 + ")"; }
+        public Expresion Opn0() {return this.opnd0;}
+        public Expresion Opn1() {return this.opnd1;}
     }
     
     public static class ExpDiv extends Expresion {
-        public Expresion opnd0, opnd1;
+        private Expresion opnd0, opnd1;
         public ExpDiv(Expresion opnd0, Expresion opnd1) { 
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "div(" + opnd0 + ", " + opnd1 + ")"; }
+        public Expresion Opn0() {return this.opnd0;}
+        public Expresion Opn1() {return this.opnd1;}
     }
     
     public static class ExpMod extends Expresion {
-        public Expresion opnd0, opnd1;
+        private Expresion opnd0, opnd1;
         public ExpMod(Expresion opnd0, Expresion opnd1) { 
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "mod(" + opnd0 + ", " + opnd1 + ")"; }
+        public Expresion Opn0() {return this.opnd0;}
+        public Expresion Opn1() {return this.opnd1;}
     }
     
     public static class ExpUnariaMenos extends Expresion {
-        public Expresion opnd;
+        private Expresion opnd;
         public ExpUnariaMenos(Expresion opnd) { 
             super();
             this.opnd = opnd; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "menos(" + opnd + ")"; }
+        public Expresion Opn0() {return this.opnd;}
     }
     
     public static class ExpUnariaNot extends Expresion {
-        public Expresion opnd;
+        private Expresion opnd;
         public ExpUnariaNot(Expresion opnd) { 
             super();
             this.opnd = opnd; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "not(" + opnd + ")"; }
+        public Expresion Opn0() {return this.opnd;}
     }
     
     public static class ExpAccesoArray extends Expresion {
-        public Expresion array;
-        public Expresion indice;
+        private Expresion array;
+        private Expresion indice;
         public ExpAccesoArray(Expresion array, Expresion indice) { 
             super();
             this.array = array; this.indice = indice; 
@@ -726,74 +877,83 @@ public class SintaxisAbstractaEval {
     }
     
     public static class ExpAccesoPunto extends Expresion {
-        public Expresion exp;
-        public String campo;
+        private Expresion exp;
+        private String campo;
         public ExpAccesoPunto(Expresion exp, String campo) { 
             super();
             this.exp = exp; this.campo = campo; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "acceso_punto(" + exp + ", " + campo + ")"; }
+        public Expresion Opn0() {return this.exp;}
+        public String campo() {return this.campo;}
+        
     }
     
     public static class ExpAccesoPuntero extends Expresion {
-        public Expresion exp;
+        private Expresion exp;
         public ExpAccesoPuntero(Expresion exp) { 
             super();
             this.exp = exp; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "acceso_puntero(" + exp + ")"; }
+        public Expresion Opn0() {return this.exp;}
     }
     
     public static class FactorLitEnt extends Expresion {
-        public String valor;
+        private String valor;
         public FactorLitEnt(String valor) { 
             super();
             this.valor = valor; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "lit_ent(" + valor + ")"; }
+        public String lit() {return this.valor;}
     }
     
     public static class FactorLitReal extends Expresion {
-        public String valor;
+        private String valor;
         public FactorLitReal(String valor) { 
             super();
             this.valor = valor; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "lit_real(" + valor + ")"; }
+        public String lit() {return this.valor;}
     }
     
     public static class FactorLitBool extends Expresion {
-        public String valor;
+        private String valor;
         public FactorLitBool(String valor) { 
             super();
             this.valor = valor; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "lit_bool(" + valor + ")"; }
+        public String lit() {return this.valor;}
     }
     
     public static class FactorLitCadena extends Expresion {
-        public String valor;
+        private String valor;
         public FactorLitCadena(String valor) { 
             super();
             this.valor = valor; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "lit_cadena(" + valor + ")"; }
+        public String lit() {return this.valor;}
     }
     
     public static class FactorIdentificador extends Expresion {
-        public String id;
+        private String id;
         public FactorIdentificador(String id) { 
             super();
             this.id = id; 
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "iden(" + id + ")"; }
+        public String lit() {return this.id;}
     }
     
     public static class FactorNull extends Expresion {
