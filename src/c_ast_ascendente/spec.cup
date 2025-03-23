@@ -242,9 +242,9 @@ operador_unario ::= MENOS
     {: RESULT = "-"; :};
 
 operador_relacional ::= MENOR
-    {: RESULT = "-"; :};
+    {: RESULT = "<"; :};
 operador_relacional ::= MAYOR
-    {: RESULT = "+"; :};
+    {: RESULT = ">"; :};
 operador_relacional ::= MENIGUAL
     {: RESULT = "<="; :};
 operador_relacional ::= MAYIGUAL

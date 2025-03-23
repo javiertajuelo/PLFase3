@@ -3,7 +3,7 @@ import java.io.FileReader;
 
 public class Main{
    public static void main(String[] args) throws Exception {
-      ConstructorASTsTiny asint = new ConstructorASTsTinyDJ(new FileReader("sample5d.in"));
+      ConstructorASTsTiny asint = new ConstructorASTsTinyDJ(new FileReader("sample1d.in"));
       asint.disable_tracing();
       try {
           System.out.println(asint.analiza());
