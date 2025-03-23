@@ -874,6 +874,8 @@ public class SintaxisAbstractaEval {
         }
         public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "acceso_array(" + array + ", " + indice + ")"; }
+        public Expresion Opn0() {return this.array;}
+        public Expresion Opn1() {return this.indice;}
     }
     
     public static class ExpAccesoPunto extends Expresion {
