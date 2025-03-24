@@ -10,80 +10,7 @@ public class SintaxisAbstractaEval {
         public Nodo ponCol(int col) { this.col = col; return this; }
         public int leeFila() { return fila; }
         public int leeCol() { return col; }
-        public abstract <T> T accept(Visitor<T> v);
-    }
-
-    // Interfaz Visitor: se define un m�todo para cada tipo de nodo.
-    public interface Visitor<T> {
-        T visit(Prog n);
-        T visit(Declaraciones_Con_Separador n);
-        T visit(Sin_Declaraciones n);
-        T visit(Una_dec n);
-        T visit(Muchas_decs n);
-        T visit(DecTipo n);
-        T visit(DecType n);
-        T visit(DecProc n);
-        T visit(TipoArray n);
-        T visit(TipoPuntero n);
-        T visit(TipoInt n);
-        T visit(TipoReal n);
-        T visit(TipoBool n);
-        T visit(TipoString n);
-        T visit(TipoStruct n);
-        T visit(TipoIden n);
-        T visit(Un_campo n);
-        T visit(Muchos_campos n);
-        T visit(ConParametros n);
-        T visit(SinParametros n);
-        T visit(Un_param n);
-        T visit(Muchos_param n);
-        T visit(Lista_Instrucciones n);
-        T visit(Sin_Instrucciones n);
-        T visit(InstruccionEval n);
-        T visit(InstruccionIf n);
-        T visit(InstruccionWhile n);
-        T visit(InstruccionRead n);
-        T visit(InstruccionWrite n);
-        T visit(InstruccionNl n);
-        T visit(InstruccionNew n);
-        T visit(InstruccionDelete n);
-        T visit(InstruccionCall n);
-        T visit(InstruccionPrograma n);
-        T visit(ElseOptElse n);
-        T visit(ElseOptVacio n);
-        T visit(ConArgumentos n);
-        T visit(SinArgumentos n);
-        T visit(Un_arg n);
-        T visit(Muchos_arg n);
-        T visit(ExpAsignacion n);
-        T visit(ExpRelMenor n);
-        T visit(ExpRelMayor n);
-        T visit(ExpRelMenorIgual n);
-        T visit(ExpRelMayorIgual n);
-        T visit(ExpRelIgualIgual n);
-        T visit(ExpRelDistinto n);
-        T visit(ExpAdicSuma n);
-        T visit(ExpAdicResta n);
-        T visit(ExpLogAnd n);
-        T visit(ExpLogOr n);
-        T visit(ExpMul n);
-        T visit(ExpDiv n);
-        T visit(ExpMod n);
-        T visit(ExpUnariaMenos n);
-        T visit(ExpUnariaNot n);
-        T visit(ExpAccesoArray n);
-        T visit(ExpAccesoPunto n);
-        T visit(ExpAccesoPuntero n);
-        T visit(FactorLitEnt n);
-        T visit(FactorLitReal n);
-        T visit(FactorLitBool n);
-        T visit(FactorLitCadena n);
-        T visit(FactorIdentificador n);
-        T visit(FactorNull n);
-		T visit(ParametroValor parametroValor);
-		T visit(ParametroReferencia parametroReferencia);
-		T visit(Muchas_instrucciones muchas_instrucciones);
-		T visit(Una_instruccion una_instruccion);
+        public abstract void imprime(); //Patrón Intérprete
     }
 
     public static class Prog extends Nodo {
@@ -94,11 +21,18 @@ public class SintaxisAbstractaEval {
             this.dcs = dcs;
             this.insts = insts;
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return ""; }
         public DeclaracionesConSep dcs() {return this.dcs;}
         public Insts inst() {return this.insts;}
         //public String toString() { return "prog(" + dcs + ", " + insts + ")"; }
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+				System.out.println("{");
+				this.dcs.imprime();
+				this.insts.imprime();
+				System.out.println("}");
+		}
     }
     
     public static abstract class DeclaracionesConSep extends Nodo {
@@ -112,15 +46,19 @@ public class SintaxisAbstractaEval {
             super();
             this.decs = decs; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "decs(" + decs + ")"; }
         public LDecs ldecs() {return this.decs;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {decs.imprime(); System.out.println("&&");}
     }
     
     public static class Sin_Declaraciones extends DeclaracionesConSep {
         public Sin_Declaraciones() { super(); }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "sin_decs()"; }
+		
+        @Override //Patrón Intérprete
+		public void imprime() {}
     }
     
     public static abstract class LDecs extends Nodo { 
@@ -138,9 +76,13 @@ public class SintaxisAbstractaEval {
             super();
             this.dec = dec; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "una_dec(" + dec + ")"; }
         public Declaracion dec() {return this.dec;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+        	dec.imprime();
+        }
     }
     
     public static class Muchas_decs extends LDecs {
@@ -151,10 +93,16 @@ public class SintaxisAbstractaEval {
             this.decs = decs; 
             this.dec = dec; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "muchas_decs(" + decs + ", " + dec + ")"; }
         public LDecs ldecs() {return this.decs;}
         public Declaracion dec() {return this.dec;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+			decs.imprime();
+			System.out.println(";");
+			dec.imprime();
+		}
     }
     
     public static abstract class Declaracion extends Nodo {
@@ -175,10 +123,15 @@ public class SintaxisAbstractaEval {
             this.tipo = tipo; 
             this.id = id; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "dec_tipo(" + tipo + ", " + id +"["+leeFila()+","+leeCol()+"]" + ")"; }
         public Tipo tipo() {return this.tipo;}
         public String iden() {return this.id;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+			tipo.imprime();
+			System.out.println(id + "$f:"+this.leeFila()+",c:"+this.leeCol()+"$");
+		}
     }
     
     public static class DecType extends Declaracion {
@@ -188,10 +141,16 @@ public class SintaxisAbstractaEval {
             this.tipo = tipo; 
             this.id = id; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "dec_type(" + tipo + ", " + id +"["+leeFila()+","+leeCol()+"]"+ ")"; }
         public Tipo tipo() {return this.tipo;}
         public String iden() {return this.id;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+        	System.out.println("<type>");
+    		tipo.imprime();
+    		System.out.println(id + "$f:"+this.leeFila()+",c:"+this.leeCol()+"$");
+		}
     }
     
     public static class DecProc extends Declaracion {
@@ -205,11 +164,18 @@ public class SintaxisAbstractaEval {
             this.cuerpo = cuerpo;
         }
         
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "dec_proc(" + id +"["+leeFila()+","+leeCol()+"]," + params + ", " + cuerpo + ")"; }
         public String iden() {return this.id;}
         public Params params() {return this.params;}
         public Prog cuerpo() { return this.cuerpo;}
+
+		@Override //Patrón Intérprete
+		public void imprime() {
+			System.out.println("<proc>");
+    		System.out.println(id + "$f:"+this.leeFila()+",c:"+this.leeCol()+"$");
+    		params.imprime();	
+    		cuerpo.imprime();
+		}
     }
     
    
@@ -231,10 +197,16 @@ public class SintaxisAbstractaEval {
             this.base = base;
             this.size = size;
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "tipo_array(" + base + ", " + size + ")"; }
         public Tipo tipo() {return this.base;}
         public String size() {return this.size;}
+		@Override
+		public void imprime() { //Patrón Intérprete
+			base.imprime();
+    		System.out.println("[");
+    		System.out.println(size);
+    		System.out.println("]$f:"+this.leeFila()+",c:"+this.leeCol()+"$");
+		}
     }
     
     public static class TipoPuntero extends Tipo {
@@ -243,33 +215,55 @@ public class SintaxisAbstractaEval {
             super();
             this.base = base; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "tipo_puntero(" + base + ")"; }
         public Tipo tipo() {return this.base;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+        	System.out.println("^");
+    		base.imprime();
+		}
     }
     
     public static class TipoInt extends Tipo {
         public TipoInt() { super(); }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "tipo_int"; }
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+			System.out.println("<int>");
+		}
     }
     
     public static class TipoReal extends Tipo {
         public TipoReal() { super(); }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "tipo_real"; }
+        @Override //Patrón Intérprete
+		public void imprime() {
+			System.out.println("<real>");
+		}
     }
     
     public static class TipoBool extends Tipo {
         public TipoBool() { super(); }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "tipo_bool"; }
+        @Override //Patrón Intérprete
+		public void imprime() {
+			System.out.println("<bool>");
+		}
     }
     
     public static class TipoString extends Tipo {
         public TipoString() { super(); }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "tipo_string"; }
+        @Override //Patrón Intérprete
+		public void imprime() {
+			System.out.println("<string>");
+		}
     }
     
     public static class TipoStruct extends Tipo {
@@ -278,9 +272,17 @@ public class SintaxisAbstractaEval {
             super();
             this.campos = campos; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "tipo_struct(" + campos + ")"; }
         public Cmps campos() {return this.campos;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+        	System.out.println("<struct>");
+    		System.out.println("{");
+    		campos.imprime();
+    		System.out.println("}");
+		}
     }
     
     public static class TipoIden extends Tipo {
@@ -289,9 +291,13 @@ public class SintaxisAbstractaEval {
             super();
             this.id = id; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "tipo_iden(" + id + ")"; }
         public String iden() {return this.id;}
+		@Override
+		public void imprime() {
+			System.out.println(id +"$f:"+this.leeFila()+",c:"+this.leeCol()+"$");
+		}
     }
     
    
@@ -307,9 +313,14 @@ public class SintaxisAbstractaEval {
             super();
             this.dec = dec; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "un_campo(" + dec + ")"; }
         public Declaracion dec() {return this.dec;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+			dec.imprime();
+		}
     }
     
     public static class Muchos_campos extends Cmps {
@@ -320,10 +331,17 @@ public class SintaxisAbstractaEval {
             this.campos = campos;
             this.dec = dec;
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "muchos_campos(" + campos + ", " + dec + ")"; }
         public Declaracion dec() {return this.dec;}
         public Cmps campos() {return this.campos;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+			campos.imprime();
+			System.out.println(",");
+			dec.imprime();
+		}
     }
     
     
@@ -338,15 +356,28 @@ public class SintaxisAbstractaEval {
             super();
             this.lparam = lparam; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "con_params(" + lparam + ")"; }
         public LParam lparam() {return this.lparam;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+        	System.out.println("(");
+			lparam.imprime();
+			System.out.println(")");
+		}
     }
     
     public static class SinParametros extends Params {
         public SinParametros() { super(); }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "sin_parametros"; }
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+        	System.out.println("(");
+			System.out.println(")");
+        }
     }
     
     public static abstract class LParam extends Nodo {
@@ -361,9 +392,13 @@ public class SintaxisAbstractaEval {
             super();
             this.param = param; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "un_param(" + param + ")"; }
         public Tipo tipo() {return this.param;}
+		@Override
+		public void imprime() {
+			param.imprime();
+		}
     }
     
     public static class Muchos_param extends LParam {
@@ -374,10 +409,17 @@ public class SintaxisAbstractaEval {
             this.lparam = lparam;
             this.param = param;
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "muchos_param(" + lparam + ", " + param + ")"; }
         public LParam lparam() {return this.lparam;}
         public Tipo tipo() {return this.param;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+			lparam.imprime();
+			System.out.println(",");
+			param.imprime();
+		}
     }
     
     
@@ -391,10 +433,16 @@ public class SintaxisAbstractaEval {
             this.tipo = tipo; 
             this.id = id; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "parametro(" + tipo + ", " + id + ")"; }
         public Tipo tipo() {return this.tipo;}
         public String iden() {return this.id;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+			tipo.imprime();
+    		System.out.println(id+"$f:"+this.leeFila()+",c:"+this.leeCol()+"$");
+		}
     }
     
     public static class ParametroReferencia extends Tipo {
@@ -405,10 +453,16 @@ public class SintaxisAbstractaEval {
             this.tipo = tipo; 
             this.id = id; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "parametro_referencia(" + tipo + ", " + id + ")"; }
         public Tipo tipo() {return this.tipo;}
         public String iden() {return this.id;}
+		@Override
+		public void imprime() {
+			System.out.println("&");
+    		tipo.imprime();
+    		System.out.println(id);
+		}
     }
     
    
@@ -423,15 +477,22 @@ public class SintaxisAbstractaEval {
             super();
             this.insts = insts; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "lista_instrucciones" + insts; }
         public LIns insts() {return this.insts;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+			insts.imprime();
+		}
     }
     
     public static class Sin_Instrucciones extends Insts {
         public Sin_Instrucciones() { super(); }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "sin_instrucciones"; }
+		@Override
+		public void imprime() {}
     }
     public static abstract class LIns extends Nodo { 
     	public LIns() {super();}
@@ -445,9 +506,14 @@ public class SintaxisAbstractaEval {
             super();
             this.inst = inst; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "un_instruccion(" + inst + ")"; }
         public Instruccion inst() {return this.inst;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+			inst.imprime();
+		}
     }
     
     public static class Muchas_instrucciones extends LIns {
@@ -458,10 +524,17 @@ public class SintaxisAbstractaEval {
             this.insts = insts;
             this.inst = inst;
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "muchas_instrucciones(" + insts + ", " + inst + ")"; }
         public Instruccion inst() {return this.inst;}
         public LIns insts() {return this.insts;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+			insts.imprime();
+			System.out.println(";");
+			inst.imprime();
+		}
     }
    
     public static abstract class Instruccion extends Nodo {
@@ -479,9 +552,15 @@ public class SintaxisAbstractaEval {
             super();
             this.exp = exp; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "@(" + exp + ")"; }
         public Expresion exp() {return this.exp;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+			System.out.println("@");
+    		exp.imprime();
+		}
     }
     
     public static class InstruccionIf extends Instruccion {
@@ -494,11 +573,19 @@ public class SintaxisAbstractaEval {
             this.thenProg = thenProg; 
             this.elseOpt = elseOpt;
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "if(" + cond + ", " + thenProg + ", " + elseOpt + ")"; }
         public Expresion exp() {return this.cond;}
         public Prog prog() {return this.thenProg;}
         public Else elseOpt() {return this.elseOpt;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+			System.out.println("<if>");
+    		cond.imprime();
+    		thenProg.imprime();
+    		elseOpt.imprime();
+		}
     }
     
     public static class InstruccionWhile extends Instruccion {
@@ -509,10 +596,17 @@ public class SintaxisAbstractaEval {
             this.cond = cond; 
             this.cuerpo = cuerpo; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "while(" + cond + ", " + cuerpo + ")"; }
         public Expresion exp() {return this.cond;}
         public Prog prog() {return this.cuerpo;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+        	System.out.println("<while>");
+    		cond.imprime();
+    		cuerpo.imprime();
+		}
     }
     
     public static class InstruccionRead extends Instruccion {
@@ -521,9 +615,15 @@ public class SintaxisAbstractaEval {
             super();
             this.exp = exp; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "read(" + exp + ")"; }
         public Expresion exp() {return this.exp;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+        	System.out.println("<read>");
+    		exp.imprime();
+		}
     }
     
     public static class InstruccionWrite extends Instruccion {
@@ -532,15 +632,24 @@ public class SintaxisAbstractaEval {
             super();
             this.exp = exp; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "write(" + exp + ")"; }
         public Expresion exp() {return this.exp;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+        	System.out.println("<write>");
+    		exp.imprime();
+		}
     }
     
     public static class InstruccionNl extends Instruccion {
         public InstruccionNl() { super(); }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "nl()"; }
+        @Override //Patrón Intérprete
+		public void imprime() {
+        	System.out.println("<nl>");
+		}
     }
     
     public static class InstruccionNew extends Instruccion {
@@ -549,9 +658,14 @@ public class SintaxisAbstractaEval {
             super();
             this.exp = exp; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "new(" + exp + ")"; }
         public Expresion exp() {return this.exp;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+        	System.out.println("<new>");
+    		exp.imprime();
+		}
     }
     
     public static class InstruccionDelete extends Instruccion {
@@ -560,9 +674,14 @@ public class SintaxisAbstractaEval {
             super();
             this.exp = exp; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "delete(" + exp + ")"; }
         public Expresion exp() {return this.exp;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+        	System.out.println("<delete>");
+    		exp.imprime();
+		}
     }
     
     public static class InstruccionCall extends Instruccion {
@@ -573,10 +692,16 @@ public class SintaxisAbstractaEval {
             this.id = id; 
             this.args = args; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "call(" + id + ", " + args + ")"; }
         public String iden() {return this.id;}
         public Argus args() {return this.args;}
+		@Override //Patrón Intérprete
+		public void imprime() {
+			System.out.println("<call>");
+    		System.out.println(id+ "$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+    		args.imprime();
+		}
     }
     
     public static class InstruccionPrograma extends Instruccion {
@@ -585,9 +710,15 @@ public class SintaxisAbstractaEval {
             super();
             this.prog = prog; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "instruccion_programa(" + prog + ")"; }
         public Prog prog() {return this.prog;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+			prog.imprime();
+			
+		}
     }
     
    
@@ -602,15 +733,23 @@ public class SintaxisAbstractaEval {
             super();
             this.prog = prog; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "else(" + prog + ")"; }
         public Prog prog() {return this.prog;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+        	System.out.println("<else>");
+			prog.imprime();
+		}
     }
     
     public static class ElseOptVacio extends Else {
         public ElseOptVacio() { super(); }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "else_vacio"; }
+		@Override
+		public void imprime() {}
     }
     
     
@@ -625,15 +764,24 @@ public class SintaxisAbstractaEval {
             super();
             this.args = args; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "lista_argumentos" + args; }
         public LArgs args() {return this.args;}
+		
+        @Override //Paatrón Intérprete
+		public void imprime() {
+			System.out.println("(");
+			args.imprime();
+			System.out.println(")");
+		}
     }
     
     public static class SinArgumentos extends Argus {
         public SinArgumentos() { super(); }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "sin_argumentos"; }
+		@Override
+		public void imprime() {}
     }
     
     public static abstract class LArgs extends Nodo {
@@ -648,9 +796,14 @@ public class SintaxisAbstractaEval {
             super();
             this.exp = exp; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "un_arg(" + exp + ")"; }
         public Expresion exp() {return this.exp;}
+		
+        @Override //Patrón Intérprete
+		public void imprime() {
+			exp.imprime();
+		}
     }
     
     public static class Muchos_arg extends LArgs {
@@ -661,10 +814,17 @@ public class SintaxisAbstractaEval {
             this.args = args;
             this.exp = exp;
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "muchos_arg(" + args + ", " + exp + ")"; }
         public LArgs args() {return this.args;}
         public Expresion exp() {return this.exp;}
+		@Override
+		public void imprime() {
+			args.imprime();
+			System.out.println(",");
+			exp.imprime();
+			
+		}
     }
     
     public static abstract class Expresion extends Nodo {
@@ -681,10 +841,16 @@ public class SintaxisAbstractaEval {
             super();
             this.izq = izq; this.der = der; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+ 
         public String toString() { return "asign(" + izq + ", " + der + ")"; }
         public Expresion Opn0() {return this.izq;}
         public Expresion Opn1() {return this.der;}
+		@Override //Patrón Intérprete
+		public void imprime() {
+			izq.imprime();
+    		System.out.println("=$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+    		der.imprime();
+		}
     }
     
     public static class ExpRelMenor extends Expresion {
@@ -693,10 +859,15 @@ public class SintaxisAbstractaEval {
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
         public String toString() { return "menor(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			opnd0.imprime();
+    		System.out.println("<$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+    		opnd1.imprime();
+		}
     }
     
     public static class ExpRelMayor extends Expresion {
@@ -705,10 +876,16 @@ public class SintaxisAbstractaEval {
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "mayor(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			opnd0.imprime();
+    		System.out.println(">$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+    		opnd1.imprime();
+		}
     }
     
     public static class ExpRelMenorIgual extends Expresion {
@@ -717,10 +894,16 @@ public class SintaxisAbstractaEval {
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+        
         public String toString() { return "menor_igual(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			opnd0.imprime();
+    		System.out.println("<=$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+    		opnd1.imprime();
+		}
     }
     
     public static class ExpRelMayorIgual extends Expresion {
@@ -729,10 +912,16 @@ public class SintaxisAbstractaEval {
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+   
         public String toString() { return "mayor_igual(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			opnd0.imprime();
+    		System.out.println(">=$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+    		opnd1.imprime();
+		}
     }
     
     public static class ExpRelIgualIgual extends Expresion {
@@ -741,10 +930,16 @@ public class SintaxisAbstractaEval {
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+       
         public String toString() { return "igual_igual(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			opnd0.imprime();
+    		System.out.println("==$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+    		opnd1.imprime();
+		}
     }
     
     public static class ExpRelDistinto extends Expresion {
@@ -753,10 +948,16 @@ public class SintaxisAbstractaEval {
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+       
         public String toString() { return "distinto(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			opnd0.imprime();
+    		System.out.println("!=$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+    		opnd1.imprime();
+		}
     }
     
     public static class ExpAdicSuma extends Expresion {
@@ -765,10 +966,16 @@ public class SintaxisAbstractaEval {
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+  
         public String toString() { return "suma(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			opnd0.imprime();
+    		System.out.println("+$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+    		opnd1.imprime();
+		}
     }
     
     public static class ExpAdicResta extends Expresion {
@@ -777,10 +984,16 @@ public class SintaxisAbstractaEval {
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "resta(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			opnd0.imprime();
+    		System.out.println("-$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+    		opnd1.imprime();
+		}
     }
     
     public static class ExpLogAnd extends Expresion {
@@ -789,10 +1002,16 @@ public class SintaxisAbstractaEval {
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+  
         public String toString() { return "and(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			opnd0.imprime();
+    		System.out.println("<and>$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+    		opnd1.imprime();
+		}
     }
     
     public static class ExpLogOr extends Expresion {
@@ -801,10 +1020,16 @@ public class SintaxisAbstractaEval {
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+ 
         public String toString() { return "or(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			opnd0.imprime();
+    		System.out.println("<or>$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+    		opnd1.imprime();
+		}
     }
     
     public static class ExpMul extends Expresion {
@@ -813,10 +1038,16 @@ public class SintaxisAbstractaEval {
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+    
         public String toString() { return "mul(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			opnd0.imprime();
+    		System.out.println("*$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+    		opnd1.imprime();
+		}
     }
     
     public static class ExpDiv extends Expresion {
@@ -825,10 +1056,16 @@ public class SintaxisAbstractaEval {
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "div(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			opnd0.imprime();
+    		System.out.println("/$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+    		opnd1.imprime();
+		}
     }
     
     public static class ExpMod extends Expresion {
@@ -837,10 +1074,16 @@ public class SintaxisAbstractaEval {
             super();
             this.opnd0 = opnd0; this.opnd1 = opnd1; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "mod(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			opnd0.imprime();
+    		System.out.println("%$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+    		opnd1.imprime();
+		}
     }
     
     public static class ExpUnariaMenos extends Expresion {
@@ -849,9 +1092,14 @@ public class SintaxisAbstractaEval {
             super();
             this.opnd = opnd; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+      
         public String toString() { return "menos(" + opnd + ")"; }
         public Expresion Opn0() {return this.opnd;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+    		System.out.println("-$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+    		opnd.imprime();
+		}
     }
     
     public static class ExpUnariaNot extends Expresion {
@@ -860,9 +1108,14 @@ public class SintaxisAbstractaEval {
             super();
             this.opnd = opnd; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "not(" + opnd + ")"; }
         public Expresion Opn0() {return this.opnd;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+    		System.out.println("<not>$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+    		opnd.imprime();
+		}
     }
     
     public static class ExpAccesoArray extends Expresion {
@@ -872,10 +1125,17 @@ public class SintaxisAbstractaEval {
             super();
             this.array = array; this.indice = indice; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+    
         public String toString() { return "acceso_array(" + array + ", " + indice + ")"; }
         public Expresion Opn0() {return this.array;}
         public Expresion Opn1() {return this.indice;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			array.imprime();
+    		System.out.println("[$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+    		indice.imprime();
+    		System.out.println("]");
+		}
     }
     
     public static class ExpAccesoPunto extends Expresion {
@@ -885,10 +1145,16 @@ public class SintaxisAbstractaEval {
             super();
             this.exp = exp; this.campo = campo; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "acceso_punto(" + exp + ", " + campo + ")"; }
         public Expresion Opn0() {return this.exp;}
         public String campo() {return this.campo;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			exp.imprime();
+			System.out.println(".");
+    		System.out.println(campo+"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+		}
         
     }
     
@@ -898,9 +1164,14 @@ public class SintaxisAbstractaEval {
             super();
             this.exp = exp; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+      
         public String toString() { return "acceso_puntero(" + exp + ")"; }
         public Expresion Opn0() {return this.exp;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			exp.imprime();
+    		System.out.println("^$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
+		}
     }
     
     public static class FactorLitEnt extends Expresion {
@@ -909,9 +1180,13 @@ public class SintaxisAbstractaEval {
             super();
             this.valor = valor; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+  
         public String toString() { return "lit_ent(" + valor + ")"; }
         public String lit() {return this.valor;}
+		@Override //Patrón Intérprete
+		public void imprime() {
+			System.out.println(valor+"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
+		}
     }
     
     public static class FactorLitReal extends Expresion {
@@ -920,9 +1195,13 @@ public class SintaxisAbstractaEval {
             super();
             this.valor = valor; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+    
         public String toString() { return "lit_real(" + valor + ")"; }
         public String lit() {return this.valor;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			System.out.println(valor+"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
+		}
     }
     
     public static class FactorLitBool extends Expresion {
@@ -931,9 +1210,13 @@ public class SintaxisAbstractaEval {
             super();
             this.valor = valor; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+    
         public String toString() { return "lit_bool(" + valor + ")"; }
         public String lit() {return this.valor;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			System.out.println(valor+"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
+		}
     }
     
     public static class FactorLitCadena extends Expresion {
@@ -942,9 +1225,13 @@ public class SintaxisAbstractaEval {
             super();
             this.valor = valor; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+  
         public String toString() { return "lit_cadena(" + valor + ")"; }
         public String lit() {return this.valor;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			System.out.println(valor+"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
+		}
     }
     
     public static class FactorIdentificador extends Expresion {
@@ -953,15 +1240,23 @@ public class SintaxisAbstractaEval {
             super();
             this.id = id; 
         }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "iden(" + id + ")"; }
         public String lit() {return this.id;}
+        @Override //Patrón Intérprete
+		public void imprime() {
+			System.out.println(id+"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
+		}
     }
     
     public static class FactorNull extends Expresion {
         public FactorNull() { super(); }
-        public <T> T accept(Visitor<T> v) { return v.visit(this); }
+
         public String toString() { return "null"; }
+        @Override //Patrón Intérprete
+		public void imprime() {
+			System.out.println("<null>$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
+		}
     }
 
 

@@ -34,6 +34,7 @@ public class Imp_recursiva extends SintaxisAbstractaEval {
     private void evalDecs(DeclaracionesConSep d) {
     	if(claseDe(d, Declaraciones_Con_Separador.class)) {
     		evalDecs(d.ldecs());
+    		System.out.println("&&");
     	}
     }
     
@@ -46,28 +47,24 @@ public class Imp_recursiva extends SintaxisAbstractaEval {
     }
     
     private void evalDecs(Declaracion d) {
-    	if(env.containsKey(d.iden())) {
-    		 throw new ECteDuplicada("Cte duplicada: "+d.iden()+
-                     " fila:"+d.leeFila()+" col:"+d.leeCol()); 
+    	
+    	if(claseDe(d, DecTipo.class)) {
+    		evalTipo(d.tipo());
+    		System.out.println(d.iden() + "$f:"+d.leeFila()+",c:"+d.leeCol()+"$");
     	}
-    	else {
-    		if(claseDe(d, DecTipo.class)) {
-    			evalTipo(d.tipo());
-    			System.out.println(d.iden() + "$f:"+d.leeFila()+",c:"+d.leeCol()+"$");
-    		}
-    		else if(claseDe(d, DecType.class)) {
-    			System.out.println("<type>");
-    			evalTipo(d.tipo());
-    			System.out.println(d.iden() + "$f:"+d.leeFila()+",c:"+d.leeCol()+"$");
-    		}
-    		else if(claseDe(d, DecProc.class)) {
-    			System.out.println("<proc>");
-    			System.out.println(d.iden() + "$f:"+d.leeFila()+",c:"+d.leeCol()+"$");
-    			evalParams(d.params());		
-    			evalua(d.cuerpo());
-    		}
+    	else if(claseDe(d, DecType.class)) {
+    		System.out.println("<type>");
+    		evalTipo(d.tipo());
+    		System.out.println(d.iden() + "$f:"+d.leeFila()+",c:"+d.leeCol()+"$");
+    	}
+    	else if(claseDe(d, DecProc.class)) {
+    		System.out.println("<proc>");
+    		System.out.println(d.iden() + "$f:"+d.leeFila()+",c:"+d.leeCol()+"$");
+    		evalParams(d.params());		
+    		evalua(d.cuerpo());
     	}
     }
+   
     
     private void evalTipo(Tipo t) {
     	if(claseDe(t, TipoArray.class)) {
@@ -108,6 +105,7 @@ public class Imp_recursiva extends SintaxisAbstractaEval {
     	else if(claseDe(t, ParametroReferencia.class)) {
     		System.out.println("&");
     		evalTipo(t.tipo());
+    		System.out.println(t.iden());
     	}
     }
     
@@ -138,7 +136,6 @@ public class Imp_recursiva extends SintaxisAbstractaEval {
     
     private void evalInst(Insts i) {
     	if(claseDe(i, Lista_Instrucciones.class)) {
-    		System.out.println("&&");
     		evalInst(i.insts());
     	}
     }
@@ -198,6 +195,7 @@ public class Imp_recursiva extends SintaxisAbstractaEval {
     
     private void evalElse(Else e){
     	if(claseDe(e, ElseOptElse.class)) {
+    		System.out.println("<else>");
     		evalua(e.prog());
     	}
     }

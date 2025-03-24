@@ -20,6 +20,8 @@ public class Main {
 	System.out.println("IMPRESION RECURSIVA"); 
  	  Prog prog = (Prog)asint.parse().value;
  	  new Imp_recursiva().evalua(prog);
+ 	 System.out.println("IMPRESION INTERPRETE");
+ 	 prog.imprime();
 	 //asint.setScanner(alex);
 	  try {
 	         Object result = asint.debug_parse();
