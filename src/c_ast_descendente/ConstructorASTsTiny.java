@@ -167,8 +167,8 @@ Token lit; Tipo res;
         jj_consume_token(42);
         lit = jj_consume_token(LIT_ENT);
         jj_consume_token(43);
-        res = Tipo0Prima(sem.tipo_array(ah, lit.image));
-{if ("" != null) return  Tipo0Prima((Tipo) sem.tipo_array(ah, lit.image).ponFila(lit.beginLine).ponCol(lit.beginColumn));}
+        res = Tipo0Prima((Tipo) sem.tipo_array(ah, lit.image).ponFila(lit.beginLine).ponCol(lit.beginColumn));
+{if ("" != null) return res;}
         break;
         }
       default:
@@ -642,12 +642,12 @@ Expresion er; Expresion e2;
   final public Expresion ExpAsignPrima(Expresion ah) throws ParseException {
     trace_call("ExpAsignPrima");
     try {
-Expresion ea;
+Expresion ea; Token op;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case 47:{
-        jj_consume_token(47);
+        op = jj_consume_token(47);
         ea = ExpresionAsignacion();
-{if ("" != null) return sem.expresion_asignacion(ah, ea);}
+{if ("" != null) return (Expresion) sem.mkop(op.image,ah, ea).ponFila(op.beginLine).ponCol(op.beginColumn);}
         break;
         }
       default:
@@ -676,7 +676,7 @@ Expresion e; Expresion e2;
   final public Expresion ExpRelPrima(Expresion ah) throws ParseException {
     trace_call("ExpRelPrima");
     try {
-Expresion e; String op; Expresion e2;
+Expresion e; Token op; Expresion e2;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case 54:
       case 55:
@@ -686,7 +686,7 @@ Expresion e; String op; Expresion e2;
       case 59:{
         op = OperadorRelacional();
         e = ExpresionAditiva();
-        e2 = ExpRelPrima(sem.mkop(op, ah, e));
+        e2 = ExpRelPrima((Expresion) sem.mkop(op.image, ah, e).ponFila(op.beginLine).ponCol(op.beginColumn));
 {if ("" != null) return e2;}
         break;
         }
@@ -717,12 +717,12 @@ Expresion eLog; Expresion e1; Expresion e2;
   final public Expresion ExpAditPrima(Expresion ah) throws ParseException {
     trace_call("ExpAditPrima");
     try {
-Expresion eLog;
+Expresion eLog; Token op;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case 48:{
-        jj_consume_token(48);
+        op = jj_consume_token(48);
         eLog = ExpresionLogica();
-{if ("" != null) return sem.mkop("-", ah, eLog);}
+{if ("" != null) return (Expresion) sem.mkop(op.image, ah, eLog).ponFila(op.beginLine).ponCol(op.beginColumn);}
         break;
         }
       default:
@@ -738,12 +738,12 @@ Expresion eLog;
   final public Expresion ExpAditPrimaPrima(Expresion ah) throws ParseException {
     trace_call("ExpAditPrimaPrima");
     try {
-Expresion eLog; Expresion e1;
+Expresion eLog; Expresion e1; Token op;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case 49:{
-        jj_consume_token(49);
+        op = jj_consume_token(49);
         eLog = ExpresionLogica();
-        e1 = ExpAditPrimaPrima(sem.mkop("+", ah, eLog));
+        e1 = ExpAditPrimaPrima((Expresion) sem.mkop(op.image, ah, eLog).ponFila(op.beginLine).ponCol(op.beginColumn));
 {if ("" != null) return e1;}
         break;
         }
@@ -773,18 +773,18 @@ Expresion eMul; Expresion e1;
   final public Expresion ExpLogicaPrima(Expresion ah) throws ParseException {
     trace_call("ExpLogicaPrima");
     try {
-Expresion e;
+Expresion e; Token op;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case AND:{
-        jj_consume_token(AND);
+        op = jj_consume_token(AND);
         e = ExpresionLogica();
-{if ("" != null) return (sem.mkop("and", ah, e));}
+{if ("" != null) return (Expresion) (sem.mkop(op.image, ah, e).ponFila(op.beginLine).ponCol(op.beginColumn));}
         break;
         }
       case OR:{
-        jj_consume_token(OR);
+        op = jj_consume_token(OR);
         e = ExpresionMultiplicativa();
-{if ("" != null) return (sem.mkop("or", ah, e));}
+{if ("" != null) return (Expresion) (sem.mkop(op.image, ah, e).ponFila(op.beginLine).ponCol(op.beginColumn));}
         break;
         }
       default:
@@ -813,14 +813,14 @@ Expresion eUn; Expresion e1;
   final public Expresion ExpMultPrima(Expresion ah) throws ParseException {
     trace_call("ExpMultPrima");
     try {
-Expresion eUn; String op; Expresion e1;
+Expresion eUn; Token op; Expresion e1;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case 51:
       case 52:
       case 53:{
         op = OperadorMultiplicativo();
         eUn = ExpresionUnaria();
-        e1 = ExpMultPrima(sem.mkop(op, ah, eUn));
+        e1 = ExpMultPrima((Expresion) sem.mkop(op.image, ah, eUn).ponFila(op.beginLine).ponCol(op.beginColumn));
 {if ("" != null) return e1;}
         break;
         }
@@ -837,13 +837,13 @@ Expresion eUn; String op; Expresion e1;
   final public Expresion ExpresionUnaria() throws ParseException {
     trace_call("ExpresionUnaria");
     try {
-Expresion e; String op; Expresion e1;
+Expresion e; Token op; Expresion e1;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case NOT:
       case 48:{
         op = OperadorUnario();
         e = ExpresionUnaria();
-{if ("" != null) return sem.mkop(op, e,null);}
+{if ("" != null) return (Expresion) sem.mkop(op.image, e,null).ponFila(op.beginLine).ponCol(op.beginColumn);}
         break;
         }
       case TRUE:
@@ -885,13 +885,13 @@ Expresion f; Expresion e1;
   final public Expresion ExpAccesoPrima(Expresion ah) throws ParseException {
     trace_call("ExpAccesoPrima");
     try {
-Expresion e; Token id;Expresion e1;
+Expresion e; Token id;Expresion e1; Token t;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case 42:{
-        jj_consume_token(42);
+        t = jj_consume_token(42);
         e = ExpresionAsignacion();
         jj_consume_token(43);
-        e1 = ExpAccesoPrima(sem.expresion_acceso_array(ah, e));
+        e1 = ExpAccesoPrima((Expresion) sem.expresion_acceso_array(ah, e).ponFila(t.beginLine).ponCol(t.beginColumn));
 {if ("" != null) return e1;}
         break;
         }
@@ -903,8 +903,8 @@ Expresion e; Token id;Expresion e1;
         break;
         }
       case 44:{
-        jj_consume_token(44);
-        e1 = ExpAccesoPrima(sem.expresion_acceso_puntero(ah));
+        t = jj_consume_token(44);
+        e1 = ExpAccesoPrima((Expresion) sem.expresion_acceso_puntero(ah).ponFila(t.beginLine).ponCol(t.beginColumn));
 {if ("" != null) return e1;}
         break;
         }
@@ -956,8 +956,8 @@ Token t; Expresion e;
         break;
         }
       case NULL:{
-        jj_consume_token(NULL);
-{if ("" != null) return sem.factor_null();}
+        t = jj_consume_token(NULL);
+{if ("" != null) return (Expresion) sem.factor_null().ponFila(t.beginLine).ponCol(t.beginColumn);}
         break;
         }
       case IDEN:{
@@ -976,24 +976,24 @@ Token t; Expresion e;
     }
 }
 
-  final public String OperadorMultiplicativo() throws ParseException {
+  final public Token OperadorMultiplicativo() throws ParseException {
     trace_call("OperadorMultiplicativo");
     try {
-
+Token t;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case 51:{
-        jj_consume_token(51);
-{if ("" != null) return "*";}
+        t = jj_consume_token(51);
+{if ("" != null) return t;}
         break;
         }
       case 52:{
-        jj_consume_token(52);
-{if ("" != null) return "/";}
+        t = jj_consume_token(52);
+{if ("" != null) return t;}
         break;
         }
       case 53:{
-        jj_consume_token(53);
-{if ("" != null) return "%";}
+        t = jj_consume_token(53);
+{if ("" != null) return t;}
         break;
         }
       default:
@@ -1007,19 +1007,19 @@ Token t; Expresion e;
     }
 }
 
-  final public String OperadorUnario() throws ParseException {
+  final public Token OperadorUnario() throws ParseException {
     trace_call("OperadorUnario");
     try {
-
+Token t;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case NOT:{
-        jj_consume_token(NOT);
-{if ("" != null) return "not";}
+        t = jj_consume_token(NOT);
+{if ("" != null) return t;}
         break;
         }
       case 48:{
-        jj_consume_token(48);
-{if ("" != null) return "-";}
+        t = jj_consume_token(48);
+{if ("" != null) return t;}
         break;
         }
       default:
@@ -1033,39 +1033,39 @@ Token t; Expresion e;
     }
 }
 
-  final public String OperadorRelacional() throws ParseException {
+  final public Token OperadorRelacional() throws ParseException {
     trace_call("OperadorRelacional");
     try {
-
+Token t;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case 54:{
-        jj_consume_token(54);
-{if ("" != null) return "<";}
+        t = jj_consume_token(54);
+{if ("" != null) return t;}
         break;
         }
       case 55:{
-        jj_consume_token(55);
-{if ("" != null) return ">";}
+        t = jj_consume_token(55);
+{if ("" != null) return t;}
         break;
         }
       case 56:{
-        jj_consume_token(56);
-{if ("" != null) return "<=";}
+        t = jj_consume_token(56);
+{if ("" != null) return t;}
         break;
         }
       case 57:{
-        jj_consume_token(57);
-{if ("" != null) return ">=";}
+        t = jj_consume_token(57);
+{if ("" != null) return t;}
         break;
         }
       case 58:{
-        jj_consume_token(58);
-{if ("" != null) return "==";}
+        t = jj_consume_token(58);
+{if ("" != null) return t;}
         break;
         }
       case 59:{
-        jj_consume_token(59);
-{if ("" != null) return "!=";}
+        t = jj_consume_token(59);
+{if ("" != null) return t;}
         break;
         }
       default:

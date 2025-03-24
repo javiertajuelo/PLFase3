@@ -110,7 +110,7 @@ Tipo Tipo0() :
 Tipo Tipo0Prima(Tipo ah) :
 { Token lit; Tipo res;}
 {
-    "[" lit = <LIT_ENT> "]"  res = Tipo0Prima(sem.tipo_array(ah, lit.image)) { return  Tipo0Prima((Tipo) sem.tipo_array(ah, lit.image).ponFila(lit.beginLine).ponCol(lit.beginColumn)); }
+    "[" lit = <LIT_ENT> "]"  res = Tipo0Prima((Tipo) sem.tipo_array(ah, lit.image).ponFila(lit.beginLine).ponCol(lit.beginColumn)) { return res; }
 |   { return ah; }
 }
 
@@ -260,9 +260,9 @@ Expresion ExpresionAsignacion() :
 }
 
 Expresion ExpAsignPrima(Expresion ah) :
-{ Expresion ea; }
+{ Expresion ea; Token op; }
 {
-    "=" ea = ExpresionAsignacion() { return sem.expresion_asignacion(ah, ea); }
+    op = "=" ea = ExpresionAsignacion()  { return (Expresion) sem.mkop(op.image,ah, ea).ponFila(op.beginLine).ponCol(op.beginColumn); }
 |   { return ah; }
 }
 
@@ -274,9 +274,9 @@ Expresion ExpresionRelacional() :
 }
 
 Expresion ExpRelPrima(Expresion ah) :
-{ Expresion e; String op; Expresion e2; }
+{ Expresion e; Token op; Expresion e2; }
 {
-    op = OperadorRelacional() e = ExpresionAditiva() e2 = ExpRelPrima(sem.mkop(op, ah, e)){ return e2; }
+    op = OperadorRelacional() e = ExpresionAditiva() e2 = ExpRelPrima((Expresion) sem.mkop(op.image, ah, e).ponFila(op.beginLine).ponCol(op.beginColumn)){ return e2; }
 	|   { return ah; }
 }
 
@@ -288,16 +288,16 @@ Expresion ExpresionAditiva() :
 }
 
 Expresion ExpAditPrima(Expresion ah) :
-{ Expresion eLog; }
+{ Expresion eLog; Token op; }
 {
-    "-" eLog = ExpresionLogica() { return sem.mkop("-", ah, eLog); }
+    op = "-" eLog = ExpresionLogica() { return (Expresion) sem.mkop(op.image, ah, eLog).ponFila(op.beginLine).ponCol(op.beginColumn); }
 |   { return ah; }
 }
 
 Expresion ExpAditPrimaPrima(Expresion ah) :
-{ Expresion eLog; Expresion e1; }
+{ Expresion eLog; Expresion e1; Token op; }
 {
-    "+" eLog = ExpresionLogica() e1 = ExpAditPrimaPrima(sem.mkop("+", ah, eLog)) { return e1; }
+    op = "+" eLog = ExpresionLogica() e1 = ExpAditPrimaPrima((Expresion) sem.mkop(op.image, ah, eLog).ponFila(op.beginLine).ponCol(op.beginColumn)) { return e1; }
 |   { return ah; }
 }
 
@@ -308,10 +308,10 @@ Expresion ExpresionLogica() :
 }
 
 Expresion ExpLogicaPrima(Expresion ah) :
-{ Expresion e; }
+{ Expresion e; Token op; }
 {
-    <AND> e = ExpresionLogica() { return (sem.mkop("and", ah, e)); }
-|   <OR> e = ExpresionMultiplicativa() { return (sem.mkop("or", ah, e)); }
+    op = <AND> e = ExpresionLogica() { return (Expresion) (sem.mkop(op.image, ah, e).ponFila(op.beginLine).ponCol(op.beginColumn)); }
+|   op = <OR> e = ExpresionMultiplicativa() { return (Expresion) (sem.mkop(op.image, ah, e).ponFila(op.beginLine).ponCol(op.beginColumn)); }
 |   { return ah; }
 }
 
@@ -323,16 +323,16 @@ Expresion ExpresionMultiplicativa() :
 }
 
 Expresion ExpMultPrima(Expresion ah) :
-{ Expresion eUn; String op; Expresion e1;}
+{ Expresion eUn; Token op; Expresion e1;}
 {
-    op = OperadorMultiplicativo() eUn = ExpresionUnaria() e1 = ExpMultPrima(sem.mkop(op, ah, eUn)){ return e1; }
+    op = OperadorMultiplicativo() eUn = ExpresionUnaria() e1 = ExpMultPrima((Expresion) sem.mkop(op.image, ah, eUn).ponFila(op.beginLine).ponCol(op.beginColumn)){ return e1; }
 	|   { return ah; }
 }
 
 Expresion ExpresionUnaria() :
-{ Expresion e; String op; Expresion e1;}
+{ Expresion e; Token op; Expresion e1;}
 {
-    op = OperadorUnario() e = ExpresionUnaria() { return sem.mkop(op, e,null); }
+    op = OperadorUnario() e = ExpresionUnaria() { return (Expresion) sem.mkop(op.image, e,null).ponFila(op.beginLine).ponCol(op.beginColumn); }
 	|  e1 = ExpresionAcceso() { return e1; }
 }
 
@@ -344,11 +344,11 @@ Expresion ExpresionAcceso() :
 }
 
 Expresion ExpAccesoPrima(Expresion ah) :
-{ Expresion e; Token id;Expresion e1; }
+{ Expresion e; Token id;Expresion e1; Token t; }
 {
-    "[" e = ExpresionAsignacion() "]" e1 = ExpAccesoPrima(sem.expresion_acceso_array(ah, e)) { return e1; }
+   t = "[" e = ExpresionAsignacion() "]" e1 = ExpAccesoPrima((Expresion) sem.expresion_acceso_array(ah, e).ponFila(t.beginLine).ponCol(t.beginColumn)) { return e1; }
 	|   "." id = <IDEN> e1 =  ExpAccesoPrima((Expresion)sem.expresion_acceso_punto(ah, id.image).ponFila(id.beginLine).ponCol(id.beginColumn)) { return e1; }
-	|   "^" e1 = ExpAccesoPrima(sem.expresion_acceso_puntero(ah)) { return e1; }
+	|t = "^" e1 = ExpAccesoPrima((Expresion) sem.expresion_acceso_puntero(ah).ponFila(t.beginLine).ponCol(t.beginColumn)) { return e1; }
 	|   { return ah; }
 }
 
@@ -362,34 +362,36 @@ Expresion Factor() :
 |   t = <FALSE> { return (Expresion) sem.factor_literal_bool(t.image).ponFila(t.beginLine).ponCol(t.beginColumn); }
 |   t = <TRUE> { return (Expresion) sem.factor_literal_bool(t.image).ponFila(t.beginLine).ponCol(t.beginColumn); }
 |   t = <LIT_CADENA> { return (Expresion) sem.factor_literal_cadena(t.image).ponFila(t.beginLine).ponCol(t.beginColumn); }
-|   <NULL> { return sem.factor_null(); }
+|   t = <NULL> { return (Expresion) sem.factor_null().ponFila(t.beginLine).ponCol(t.beginColumn); }
 |   t = <IDEN> { return (Expresion) sem.factor_identificador(t.image).ponFila(t.beginLine).ponCol(t.beginColumn); }
 }
 
 
-String OperadorMultiplicativo() :
-{}
+
+
+Token OperadorMultiplicativo() :
+{Token t;}
 {
-    "*" { return "*"; }
-|   "/" { return "/"; }
-|   "%" { return "%"; }
+    t ="*" { return t; }
+|  t = "/" { return t; }
+|   t = "%" { return t; }
 }
 
 
-String OperadorUnario() :
-{}
+Token OperadorUnario() :
+{Token t;}
 {
-    <NOT> { return "not"; }
-|   "-" { return "-"; }
+    t = <NOT> { return t; }
+|  t =  "-" { return t; }
 }
 
-String OperadorRelacional() :
-{}
+Token OperadorRelacional() :
+{Token t;}
 {
-    "<"  { return "<"; }
-|   ">"  { return ">"; }
-|   "<=" { return "<="; }
-|   ">=" { return ">="; }
-|   "==" { return "=="; }
-|   "!=" { return "!="; }
+    t = "<"  { return t; }
+|   t = ">"  { return t; }
+|   t = "<=" { return t; }
+|   t = ">=" { return t; }
+|   t = "==" { return t; }
+|   t = "!=" { return t; }
 }

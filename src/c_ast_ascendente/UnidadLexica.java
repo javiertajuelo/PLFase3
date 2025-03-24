@@ -21,7 +21,6 @@ public class UnidadLexica extends ComplexSymbolFactory.ComplexSymbol {
       }
    }
 
-   // Llama al constructor de ComplexSymbol: (int sym, int left, int right, Object value)
    public UnidadLexica(int fila, int columna, int clase, String lexema) {
       super(lexema, clase, new StringLocalizado(lexema, fila, columna));
    }
@@ -31,8 +30,4 @@ public class UnidadLexica extends ComplexSymbolFactory.ComplexSymbol {
    public int columna() { return ((StringLocalizado)value).col(); }
    public String lexema() { return ((StringLocalizado)value).str(); }
 
-   @Override
-   public String toString() {
-       return lexema() + " [" + fila() + ", " + columna() + "]";
-   }
 }

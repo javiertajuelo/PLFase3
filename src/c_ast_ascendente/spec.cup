@@ -30,14 +30,12 @@ action code {:
 
 terminal 
     IF, ELSE, WHILE, READ, WRITE, NEW, DELETE, CALL, NL, 
-    NULL, STRUCT, PROC, TYPE, EVAL, AND, OR, NOT,
-    INT, REAL, BOOL, STRING, 
-    MAS, MENOS, POR, DIV, MOD, 
-    MENOR, MAYOR, MENIGUAL, MAYIGUAL, IGUAL, DISTINTO, 
-    ASIGNACION, PAP, PCIERRE, CORAP, CORCIERRE, LLAVEAP, LLAVECIERRE,
-    PUNTOYCOMA, COMA, PUNTO, PUNTERO, REFERENCIA, FINDECL;
+    NULL, STRUCT, PROC, TYPE, EVAL,
+    INT, REAL, BOOL, STRING, PAP, PCIERRE, CORCIERRE, LLAVEAP, LLAVECIERRE,
+    PUNTOYCOMA, COMA, PUNTO, REFERENCIA, FINDECL;
     
-terminal StringLocalizado IDEN, LIT_ENT, LIT_REAL, LIT_CADENA, LIT_BOOLEANO;
+terminal StringLocalizado IDEN, LIT_ENT, LIT_REAL, LIT_CADENA, LIT_BOOLEANO,ASIGNACION,MAS,MENOS,AND,OR
+,NOT,DIV,POR,MOD,MENOR,MAYOR,MENIGUAL,MAYIGUAL,IGUAL,DISTINTO,CORAP,PUNTERO;
 
 non terminal Prog programa;
 non terminal DeclaracionesConSep declaraciones_con_separador ;
@@ -57,7 +55,8 @@ non terminal LArgs argumentos;
 non terminal Expresion expresion_asignacion, expresion_relacional, expresion_aditiva,
                            expresion_logica, expresion_multiplicativa, expresion_unaria,
                            expresion_acceso, factor;
-non terminal String operador_relacional, operador_multiplicativo, operador_unario;
+                           
+non terminal StringLocalizado operador_relacional, operador_multiplicativo, operador_unario;
 
 
 programa ::= LLAVEAP declaraciones_con_separador:ds lista_instrucciones:li LLAVECIERRE
@@ -83,7 +82,7 @@ declaracion ::= PROC IDEN:id PAP lista_parametros:lp PCIERRE programa:p
     {: RESULT = (Declaracion) sem.declaracion_proc(id.str(), lp, p).ponFila(id.fila()).ponCol(id.col()); :};
 
 tipo0 ::= tipo0:t CORAP LIT_ENT:ent CORCIERRE
-    {: RESULT = sem.tipo_array(t, ent.str()); :};
+    {: RESULT = (Tipo) sem.tipo_array(t, ent.str()).ponFila(ent.fila()).ponCol(ent.col()); :};
 tipo0 ::= tipo1:t
     {: RESULT = t; :};
 
@@ -103,7 +102,7 @@ tipo2 ::= STRING
 tipo2 ::= STRUCT LLAVEAP campos:c LLAVECIERRE
     {: RESULT = sem.tipo_struct(c); :};
 tipo2 ::= IDEN:id
-    {: RESULT = (Tipo) sem.tipo_iden(id.str()).ponFila(id.fila()).ponCol(id.col());; :};
+    {: RESULT = (Tipo) sem.tipo_iden(id.str()).ponFila(id.fila()).ponCol(id.col()); :};
 
 campos ::= campos:c COMA declaracion:d
     {: RESULT = sem.muchos_campos(c, d); :};
@@ -171,46 +170,46 @@ argumentos ::= argumentos:a COMA expresion_asignacion:ea
 argumentos ::= expresion_asignacion:ea
     {: RESULT = sem.un_argumento(ea); :};
 
-expresion_asignacion ::= expresion_relacional:er ASIGNACION expresion_asignacion:ea
-    {: RESULT = sem.expresion_asignacion(er, ea); :};
+expresion_asignacion ::= expresion_relacional:er ASIGNACION:op expresion_asignacion:ea
+    {: RESULT = (Expresion) sem.mkop(op.str(),er, ea).ponFila(op.fila()).ponCol(op.col()); :};
 expresion_asignacion ::= expresion_relacional:er
     {: RESULT = er; :};
 
 expresion_relacional ::= expresion_relacional:er operador_relacional:op expresion_aditiva:ea
-    {: RESULT = sem.mkop(op, er, ea); :};
+    {: RESULT = (Expresion) sem.mkop(op.str(), er, ea).ponFila(op.fila()).ponCol(op.col()); :};
 expresion_relacional ::= expresion_aditiva:ea
     {: RESULT = ea; :};
 
-expresion_aditiva ::= expresion_aditiva:ea MAS expresion_logica:el
-    {: RESULT = sem.mkop("+", ea, el); :};
-expresion_aditiva ::= expresion_aditiva:ea MENOS expresion_logica:el
-    {: RESULT = sem.mkop("-", ea, el); :};
+expresion_aditiva ::= expresion_aditiva:ea MAS:op expresion_logica:el
+    {: RESULT = (Expresion) sem.mkop(op.str(), ea, el).ponFila(op.fila()).ponCol(op.col());; :};
+expresion_aditiva ::= expresion_aditiva:ea MENOS:op expresion_logica:el
+    {: RESULT = (Expresion) sem.mkop(op.str(), ea, el).ponFila(op.fila()).ponCol(op.col());; :};
 expresion_aditiva ::= expresion_logica:el
     {: RESULT = el; :};
 
-expresion_logica ::= expresion_multiplicativa:em AND expresion_logica:e1
-    {: RESULT = sem.mkop("and", em, e1); :};
-expresion_logica ::= expresion_multiplicativa:em OR expresion_multiplicativa:em2
-    {: RESULT = sem.mkop("or", em, em2); :};
+expresion_logica ::= expresion_multiplicativa:em AND:op expresion_logica:e1
+    {: RESULT = (Expresion) sem.mkop(op.str(), em, e1).ponFila(op.fila()).ponCol(op.col()); :};
+expresion_logica ::= expresion_multiplicativa:em OR:op expresion_multiplicativa:em2
+    {: RESULT = (Expresion) sem.mkop(op.str(), em, em2).ponFila(op.fila()).ponCol(op.col()); :};
 expresion_logica ::= expresion_multiplicativa:em
     {: RESULT = em; :};
 
 expresion_multiplicativa ::= expresion_multiplicativa:em operador_multiplicativo:op expresion_unaria:eu
-    {: RESULT = sem.mkop(op, em, eu); :};
+    {: RESULT = (Expresion) sem.mkop(op.str(), em, eu).ponFila(op.fila()).ponCol(op.col()); :};
 expresion_multiplicativa ::= expresion_unaria:eu
     {: RESULT = eu; :};
 
 expresion_unaria ::= operador_unario:op expresion_unaria:eu
-    {: RESULT = sem.mkop(op, eu, null); :};
+    {: RESULT = (Expresion) sem.mkop(op.str(), eu, null).ponFila(op.fila()).ponCol(op.col());; :};
 expresion_unaria ::= expresion_acceso:ea
     {: RESULT = ea; :};
 
-expresion_acceso ::= expresion_acceso:ea CORAP expresion_asignacion:ex CORCIERRE
-    {: RESULT = sem.expresion_acceso_array(ea, ex); :};
+expresion_acceso ::= expresion_acceso:ea CORAP:op expresion_asignacion:ex CORCIERRE
+    {: RESULT = (Expresion) sem.expresion_acceso_array(ea, ex).ponFila(op.fila()).ponCol(op.col()); :};
 expresion_acceso ::= expresion_acceso:ea PUNTO IDEN:id
     {: RESULT = (Expresion) sem.expresion_acceso_punto(ea, id.str()).ponFila(id.fila()).ponCol(id.col()); :};
-expresion_acceso ::= expresion_acceso:ea PUNTERO
-    {: RESULT = sem.expresion_acceso_puntero(ea); :};
+expresion_acceso ::= expresion_acceso:ea PUNTERO:op
+    {: RESULT = (Expresion) sem.expresion_acceso_puntero(ea).ponFila(op.fila()).ponCol(op.col()); :};
 expresion_acceso ::= factor:f
     {: RESULT = f; :};
 
@@ -228,30 +227,31 @@ factor ::= NULL
     {: RESULT = sem.factor_null(); :};
 factor ::= IDEN:id
     {: RESULT = (Expresion) sem.factor_identificador(id.str()).ponFila(id.fila()).ponCol(id.col()); :};
-
-operador_multiplicativo ::= POR
-    {: RESULT = "*"; :};
-operador_multiplicativo ::= DIV
-    {: RESULT = "/"; :};
-operador_multiplicativo ::= MOD
-    {: RESULT = "%"; :};
     
-operador_unario ::= NOT
-    {: RESULT = "not"; :};
-operador_unario ::= MENOS
-    {: RESULT = "-"; :};
-
-operador_relacional ::= MENOR
-    {: RESULT = "<"; :};
-operador_relacional ::= MAYOR
-    {: RESULT = ">"; :};
-operador_relacional ::= MENIGUAL
-    {: RESULT = "<="; :};
-operador_relacional ::= MAYIGUAL
-    {: RESULT = ">="; :};
-operador_relacional ::= IGUAL
-    {: RESULT = "=="; :};
-operador_relacional ::= DISTINTO
-    {: RESULT = "!="; :};
-
+    
+    
+operador_multiplicativo ::= POR:m
+	{: RESULT = m; :};
+operador_multiplicativo ::= DIV:m
+	{: RESULT = m; :};
+operador_multiplicativo ::= MOD:m
+	{: RESULT = m; :}; 
+	   
+operador_unario ::= NOT:m
+	{: RESULT = m; :};
+operador_unario ::= MENOS:m
+	{: RESULT = m; :};
+	
+operador_relacional ::= MENOR:m
+    {: RESULT = m; :};
+operador_relacional ::= MAYOR:m
+	{: RESULT = m; :};
+operador_relacional ::= MENIGUAL:m
+	{: RESULT = m; :};
+operador_relacional ::= MAYIGUAL:m
+	{: RESULT = m; :};
+operador_relacional ::= IGUAL:m
+	{: RESULT = m; :};
+operador_relacional ::= DISTINTO:m
+	{: RESULT = m; :};
 

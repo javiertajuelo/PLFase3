@@ -8,6 +8,8 @@ public class ClaseSemanticaEval extends SintaxisAbstractaEval {
     
     public Expresion mkop(String op, Expresion opnd1, Expresion opnd2) {
         switch(op) {
+        	case "=":
+        		return expresion_asignacion(opnd1,opnd2);
             case "+":
                 return expresion_adi_suma(opnd1, opnd2);
             case "-":
