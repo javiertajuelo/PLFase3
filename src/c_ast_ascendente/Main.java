@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
+import Impresiones.Imp_Visitante;
 import Impresiones.Imp_recursiva;
 import asint.SintaxisAbstractaEval.Prog;
 import c_ast_ascendente.GestionErroresEval.ErrorLexico;
@@ -22,6 +23,8 @@ public class Main {
  	  new Imp_recursiva().evalua(prog);
  	 System.out.println("IMPRESION INTERPRETE");
  	 prog.imprime();
+ 	System.out.println("IMPRESION VISITANTE");
+	 prog.procesa(new Imp_Visitante());
 	 //asint.setScanner(alex);
 	  try {
 	         Object result = asint.debug_parse();

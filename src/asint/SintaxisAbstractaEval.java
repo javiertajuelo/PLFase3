@@ -11,6 +11,7 @@ public class SintaxisAbstractaEval {
         public int leeFila() { return fila; }
         public int leeCol() { return col; }
         public abstract void imprime(); //Patrón Intérprete
+        public abstract void procesa(Procesamiento p);
     }
 
     public static class Prog extends Nodo {
@@ -33,6 +34,10 @@ public class SintaxisAbstractaEval {
 				this.insts.imprime();
 				System.out.println("}");
 		}
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static abstract class DeclaracionesConSep extends Nodo {
@@ -51,6 +56,10 @@ public class SintaxisAbstractaEval {
 		
         @Override //Patrón Intérprete
 		public void imprime() {decs.imprime(); System.out.println("&&");}
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class Sin_Declaraciones extends DeclaracionesConSep {
@@ -59,6 +68,10 @@ public class SintaxisAbstractaEval {
 		
         @Override //Patrón Intérprete
 		public void imprime() {}
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static abstract class LDecs extends Nodo { 
@@ -83,6 +96,10 @@ public class SintaxisAbstractaEval {
 		public void imprime() {
         	dec.imprime();
         }
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class Muchas_decs extends LDecs {
@@ -102,6 +119,10 @@ public class SintaxisAbstractaEval {
 			decs.imprime();
 			System.out.println(";");
 			dec.imprime();
+		}
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -132,6 +153,10 @@ public class SintaxisAbstractaEval {
 			tipo.imprime();
 			System.out.println(id + "$f:"+this.leeFila()+",c:"+this.leeCol()+"$");
 		}
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class DecType extends Declaracion {
@@ -151,12 +176,16 @@ public class SintaxisAbstractaEval {
     		tipo.imprime();
     		System.out.println(id + "$f:"+this.leeFila()+",c:"+this.leeCol()+"$");
 		}
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class DecProc extends Declaracion {
-        public String id;
-        public Params params;
-        public Prog cuerpo;
+        private String id;
+        private Params params;
+        private Prog cuerpo;
         
         public DecProc(String id, Params params, Prog cuerpo) {
             this.id = id;
@@ -175,6 +204,11 @@ public class SintaxisAbstractaEval {
     		System.out.println(id + "$f:"+this.leeFila()+",c:"+this.leeCol()+"$");
     		params.imprime();	
     		cuerpo.imprime();
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -207,6 +241,10 @@ public class SintaxisAbstractaEval {
     		System.out.println(size);
     		System.out.println("]$f:"+this.leeFila()+",c:"+this.leeCol()+"$");
 		}
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class TipoPuntero extends Tipo {
@@ -223,6 +261,10 @@ public class SintaxisAbstractaEval {
         	System.out.println("^");
     		base.imprime();
 		}
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class TipoInt extends Tipo {
@@ -234,6 +276,11 @@ public class SintaxisAbstractaEval {
 		public void imprime() {
 			System.out.println("<int>");
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class TipoReal extends Tipo {
@@ -243,6 +290,11 @@ public class SintaxisAbstractaEval {
         @Override //Patrón Intérprete
 		public void imprime() {
 			System.out.println("<real>");
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -254,6 +306,11 @@ public class SintaxisAbstractaEval {
 		public void imprime() {
 			System.out.println("<bool>");
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class TipoString extends Tipo {
@@ -263,6 +320,11 @@ public class SintaxisAbstractaEval {
         @Override //Patrón Intérprete
 		public void imprime() {
 			System.out.println("<string>");
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -283,6 +345,11 @@ public class SintaxisAbstractaEval {
     		campos.imprime();
     		System.out.println("}");
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class TipoIden extends Tipo {
@@ -297,6 +364,11 @@ public class SintaxisAbstractaEval {
 		@Override
 		public void imprime() {
 			System.out.println(id +"$f:"+this.leeFila()+",c:"+this.leeCol()+"$");
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -321,6 +393,11 @@ public class SintaxisAbstractaEval {
 		public void imprime() {
 			dec.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class Muchos_campos extends Cmps {
@@ -341,6 +418,11 @@ public class SintaxisAbstractaEval {
 			campos.imprime();
 			System.out.println(",");
 			dec.imprime();
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -366,6 +448,11 @@ public class SintaxisAbstractaEval {
 			lparam.imprime();
 			System.out.println(")");
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class SinParametros extends Params {
@@ -378,6 +465,11 @@ public class SintaxisAbstractaEval {
         	System.out.println("(");
 			System.out.println(")");
         }
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static abstract class LParam extends Nodo {
@@ -399,6 +491,11 @@ public class SintaxisAbstractaEval {
 		public void imprime() {
 			param.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class Muchos_param extends LParam {
@@ -419,6 +516,11 @@ public class SintaxisAbstractaEval {
 			lparam.imprime();
 			System.out.println(",");
 			param.imprime();
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -443,6 +545,11 @@ public class SintaxisAbstractaEval {
 			tipo.imprime();
     		System.out.println(id+"$f:"+this.leeFila()+",c:"+this.leeCol()+"$");
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class ParametroReferencia extends Tipo {
@@ -462,6 +569,11 @@ public class SintaxisAbstractaEval {
 			System.out.println("&");
     		tipo.imprime();
     		System.out.println(id);
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -485,6 +597,11 @@ public class SintaxisAbstractaEval {
 		public void imprime() {
 			insts.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class Sin_Instrucciones extends Insts {
@@ -493,6 +610,11 @@ public class SintaxisAbstractaEval {
         public String toString() { return "sin_instrucciones"; }
 		@Override
 		public void imprime() {}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     public static abstract class LIns extends Nodo { 
     	public LIns() {super();}
@@ -514,6 +636,11 @@ public class SintaxisAbstractaEval {
 		public void imprime() {
 			inst.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class Muchas_instrucciones extends LIns {
@@ -534,6 +661,11 @@ public class SintaxisAbstractaEval {
 			insts.imprime();
 			System.out.println(";");
 			inst.imprime();
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
    
@@ -561,6 +693,11 @@ public class SintaxisAbstractaEval {
 			System.out.println("@");
     		exp.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class InstruccionIf extends Instruccion {
@@ -586,6 +723,11 @@ public class SintaxisAbstractaEval {
     		thenProg.imprime();
     		elseOpt.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class InstruccionWhile extends Instruccion {
@@ -607,6 +749,11 @@ public class SintaxisAbstractaEval {
     		cond.imprime();
     		cuerpo.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class InstruccionRead extends Instruccion {
@@ -624,6 +771,11 @@ public class SintaxisAbstractaEval {
         	System.out.println("<read>");
     		exp.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class InstruccionWrite extends Instruccion {
@@ -640,6 +792,11 @@ public class SintaxisAbstractaEval {
         	System.out.println("<write>");
     		exp.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class InstruccionNl extends Instruccion {
@@ -649,6 +806,11 @@ public class SintaxisAbstractaEval {
         @Override //Patrón Intérprete
 		public void imprime() {
         	System.out.println("<nl>");
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -666,6 +828,11 @@ public class SintaxisAbstractaEval {
         	System.out.println("<new>");
     		exp.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class InstruccionDelete extends Instruccion {
@@ -681,6 +848,11 @@ public class SintaxisAbstractaEval {
 		public void imprime() {
         	System.out.println("<delete>");
     		exp.imprime();
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -702,6 +874,11 @@ public class SintaxisAbstractaEval {
     		System.out.println(id+ "$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
     		args.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class InstruccionPrograma extends Instruccion {
@@ -718,6 +895,11 @@ public class SintaxisAbstractaEval {
 		public void imprime() {
 			prog.imprime();
 			
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -742,6 +924,11 @@ public class SintaxisAbstractaEval {
         	System.out.println("<else>");
 			prog.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class ElseOptVacio extends Else {
@@ -750,6 +937,11 @@ public class SintaxisAbstractaEval {
         public String toString() { return "else_vacio"; }
 		@Override
 		public void imprime() {}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     
@@ -774,14 +966,24 @@ public class SintaxisAbstractaEval {
 			args.imprime();
 			System.out.println(")");
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class SinArgumentos extends Argus {
-        public SinArgumentos() { super(); }
+        public SinArgumentos() {super();}
 
         public String toString() { return "sin_argumentos"; }
 		@Override
 		public void imprime() {}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static abstract class LArgs extends Nodo {
@@ -804,6 +1006,11 @@ public class SintaxisAbstractaEval {
 		public void imprime() {
 			exp.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class Muchos_arg extends LArgs {
@@ -824,6 +1031,11 @@ public class SintaxisAbstractaEval {
 			System.out.println(",");
 			exp.imprime();
 			
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -851,6 +1063,11 @@ public class SintaxisAbstractaEval {
     		System.out.println("=$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
     		der.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class ExpRelMenor extends Expresion {
@@ -867,6 +1084,10 @@ public class SintaxisAbstractaEval {
 			opnd0.imprime();
     		System.out.println("<$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
     		opnd1.imprime();
+		}
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -886,6 +1107,11 @@ public class SintaxisAbstractaEval {
     		System.out.println(">$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
     		opnd1.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class ExpRelMenorIgual extends Expresion {
@@ -903,6 +1129,11 @@ public class SintaxisAbstractaEval {
 			opnd0.imprime();
     		System.out.println("<=$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
     		opnd1.imprime();
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -922,6 +1153,11 @@ public class SintaxisAbstractaEval {
     		System.out.println(">=$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
     		opnd1.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class ExpRelIgualIgual extends Expresion {
@@ -939,6 +1175,11 @@ public class SintaxisAbstractaEval {
 			opnd0.imprime();
     		System.out.println("==$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
     		opnd1.imprime();
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -958,6 +1199,11 @@ public class SintaxisAbstractaEval {
     		System.out.println("!=$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
     		opnd1.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class ExpAdicSuma extends Expresion {
@@ -975,6 +1221,11 @@ public class SintaxisAbstractaEval {
 			opnd0.imprime();
     		System.out.println("+$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
     		opnd1.imprime();
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -994,6 +1245,11 @@ public class SintaxisAbstractaEval {
     		System.out.println("-$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
     		opnd1.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class ExpLogAnd extends Expresion {
@@ -1011,6 +1267,11 @@ public class SintaxisAbstractaEval {
 			opnd0.imprime();
     		System.out.println("<and>$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
     		opnd1.imprime();
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -1030,6 +1291,11 @@ public class SintaxisAbstractaEval {
     		System.out.println("<or>$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
     		opnd1.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class ExpMul extends Expresion {
@@ -1047,6 +1313,11 @@ public class SintaxisAbstractaEval {
 			opnd0.imprime();
     		System.out.println("*$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
     		opnd1.imprime();
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -1066,6 +1337,11 @@ public class SintaxisAbstractaEval {
     		System.out.println("/$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
     		opnd1.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class ExpMod extends Expresion {
@@ -1084,6 +1360,11 @@ public class SintaxisAbstractaEval {
     		System.out.println("%$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
     		opnd1.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class ExpUnariaMenos extends Expresion {
@@ -1100,6 +1381,11 @@ public class SintaxisAbstractaEval {
     		System.out.println("-$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
     		opnd.imprime();
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class ExpUnariaNot extends Expresion {
@@ -1115,6 +1401,11 @@ public class SintaxisAbstractaEval {
 		public void imprime() {
     		System.out.println("<not>$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
     		opnd.imprime();
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -1136,6 +1427,11 @@ public class SintaxisAbstractaEval {
     		indice.imprime();
     		System.out.println("]");
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class ExpAccesoPunto extends Expresion {
@@ -1155,6 +1451,11 @@ public class SintaxisAbstractaEval {
 			System.out.println(".");
     		System.out.println(campo+"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
         
     }
     
@@ -1172,6 +1473,11 @@ public class SintaxisAbstractaEval {
 			exp.imprime();
     		System.out.println("^$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class FactorLitEnt extends Expresion {
@@ -1186,6 +1492,11 @@ public class SintaxisAbstractaEval {
 		@Override //Patrón Intérprete
 		public void imprime() {
 			System.out.println(valor+"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -1202,6 +1513,11 @@ public class SintaxisAbstractaEval {
 		public void imprime() {
 			System.out.println(valor+"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class FactorLitBool extends Expresion {
@@ -1216,6 +1532,11 @@ public class SintaxisAbstractaEval {
         @Override //Patrón Intérprete
 		public void imprime() {
 			System.out.println(valor+"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
     
@@ -1232,6 +1553,11 @@ public class SintaxisAbstractaEval {
 		public void imprime() {
 			System.out.println(valor+"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class FactorIdentificador extends Expresion {
@@ -1247,6 +1573,11 @@ public class SintaxisAbstractaEval {
 		public void imprime() {
 			System.out.println(id+"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
 		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
+		}
     }
     
     public static class FactorNull extends Expresion {
@@ -1256,6 +1587,11 @@ public class SintaxisAbstractaEval {
         @Override //Patrón Intérprete
 		public void imprime() {
 			System.out.println("<null>$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
+		}
+
+		@Override
+		public void procesa(Procesamiento p) {
+			p.procesa(this);
 		}
     }
 

@@ -18,11 +18,8 @@ public class Imp_recursiva extends SintaxisAbstractaEval {
             super(msg);
         }
     }
-    private Map<String,Float> env;
     
-    public Imp_recursiva() {
-        this.env = new HashMap<>();
-    }
+    public Imp_recursiva() {}
     
     public void evalua(Prog n) {
     	System.out.println("{");
