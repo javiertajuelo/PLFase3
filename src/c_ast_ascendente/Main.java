@@ -15,7 +15,7 @@ import java_cup.runtime.Symbol;
 public class Main {
    public static void main(String[] args) throws Exception {
 	ComplexSymbolFactory csf = new ComplexSymbolFactory();
-    Reader input = new InputStreamReader(new FileInputStream("sample1a.in"));
+    Reader input = new InputStreamReader(new FileInputStream("sample5a.in"));
     AnalizadorLexicoEval alex = new AnalizadorLexicoEval(input);
 	AnalizadorSintacticoEval asint = new AnalizadorSintacticoEvalDJ(alex,csf);
 	System.out.println("IMPRESION RECURSIVA"); 

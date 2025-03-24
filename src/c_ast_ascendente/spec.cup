@@ -30,12 +30,11 @@ action code {:
 
 terminal 
     IF, ELSE, WHILE, READ, WRITE, NEW, DELETE, CALL, NL, 
-    NULL, STRUCT, PROC, TYPE, EVAL,
+    STRUCT, PROC, TYPE, EVAL,
     INT, REAL, BOOL, STRING, PAP, PCIERRE, CORCIERRE, LLAVEAP, LLAVECIERRE,
     PUNTOYCOMA, COMA, PUNTO, REFERENCIA, FINDECL;
     
-terminal StringLocalizado IDEN, LIT_ENT, LIT_REAL, LIT_CADENA, LIT_BOOLEANO,ASIGNACION,MAS,MENOS,AND,OR
-,NOT,DIV,POR,MOD,MENOR,MAYOR,MENIGUAL,MAYIGUAL,IGUAL,DISTINTO,CORAP,PUNTERO;
+terminal StringLocalizado IDEN, LIT_ENT, LIT_REAL, LIT_CADENA, LIT_BOOLEANO,ASIGNACION,MAS,MENOS,AND,OR,NOT,DIV,POR,MOD,MENOR,MAYOR,MENIGUAL,MAYIGUAL,IGUAL,DISTINTO,CORAP,PUNTERO,NULL;
 
 non terminal Prog programa;
 non terminal DeclaracionesConSep declaraciones_con_separador ;
@@ -223,8 +222,8 @@ factor ::= LIT_CADENA:lc
     {: RESULT = (Expresion) sem.factor_literal_cadena(lc.str()).ponFila(lc.fila()).ponCol(lc.col()); :};
 factor ::= LIT_BOOLEANO:b
     {: RESULT = (Expresion) sem.factor_literal_bool(b.str()).ponFila(b.fila()).ponCol(b.col()); :};
-factor ::= NULL
-    {: RESULT = sem.factor_null(); :};
+factor ::= NULL:n
+    {: RESULT = (Expresion) sem.factor_null().ponFila(n.fila()).ponCol(n.col()); :};
 factor ::= IDEN:id
     {: RESULT = (Expresion) sem.factor_identificador(id.str()).ponFila(id.fila()).ponCol(id.col()); :};
     

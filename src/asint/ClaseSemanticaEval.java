@@ -35,10 +35,16 @@ public class ClaseSemanticaEval extends SintaxisAbstractaEval {
                 return expresion_rel_igual_igual(opnd1, opnd2);
             case "!=":
                 return expresion_rel_distinto(opnd1, opnd2);
+            case "<and>":
+                return expresion_log_and(opnd1, opnd2);
             case "and":
                 return expresion_log_and(opnd1, opnd2);
-            case "or":
+            case "<or>" :
                 return expresion_log_or(opnd1, opnd2);
+            case "or" :
+                return expresion_log_or(opnd1, opnd2);
+            case "<not>":
+                return expresion_unaria_not(opnd1);
             case "not":
                 return expresion_unaria_not(opnd1);
             default:

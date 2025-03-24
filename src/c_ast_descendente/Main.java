@@ -5,11 +5,12 @@ import Impresiones.Imp_recursiva;
 
 public class Main{
    public static void main(String[] args) throws Exception {
-      ConstructorASTsTiny asint = new ConstructorASTsTinyDJ(new FileReader("sample1d.in"));
+      ConstructorASTsTiny asint = new ConstructorASTsTinyDJ(new FileReader("sample5d.in"));
       asint.disable_tracing();
-      new Imp_recursiva().evalua(asint.analiza());
       try {
+          new Imp_recursiva().evalua(asint.analiza());
           System.out.println(asint.analiza());
+
       }catch(TokenMgrError e) {
      	 System.out.println("ERROR_LEXICO");
      	 //System.out.println(e.getMessage());

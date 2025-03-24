@@ -1531,7 +1531,7 @@ public class SintaxisAbstractaEval {
         public String lit() {return this.valor;}
         @Override //Patrón Intérprete
 		public void imprime() {
-			System.out.println(valor+"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
+			System.out.println(valor +"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
 		}
 
 		@Override
