@@ -1317,7 +1317,7 @@ public class SintaxisAbstractaEval {
         public int prioridad() {return 4;}
         @Override //Patrón Intérprete
 		public void imprime() {
-        	imprimeExpBin(opnd0, "*", opnd1,5,4, this.leeFila(), this.leeCol());
+        	imprimeExpBin(opnd0, "*", opnd1,4,5, this.leeFila(), this.leeCol());
 		}
 
 		@Override
@@ -1339,7 +1339,7 @@ public class SintaxisAbstractaEval {
         public int prioridad() {return 4;}
         @Override //Patrón Intérprete
 		public void imprime() {
-        	imprimeExpBin(opnd0, "/", opnd1,5,4, this.leeFila(), this.leeCol());
+        	imprimeExpBin(opnd0, "/", opnd1,4,5, this.leeFila(), this.leeCol());
 		}
 
 		@Override
@@ -1361,7 +1361,7 @@ public class SintaxisAbstractaEval {
         public int prioridad() {return 4;}
         @Override //Patrón Intérprete
 		public void imprime() {
-        	imprimeExpBin(opnd0, "%", opnd1,5,4, this.leeFila(), this.leeCol());
+        	imprimeExpBin(opnd0, "%", opnd1,4,5, this.leeFila(), this.leeCol());
 		}
 
 		@Override

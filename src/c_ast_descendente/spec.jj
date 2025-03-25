@@ -359,8 +359,8 @@ Expresion Factor() :
     "(" e = ExpresionAsignacion() ")" { return e; }
 |   t = <LIT_ENT> { return (Expresion) sem.factor_literal_entero(t.image).ponFila(t.beginLine).ponCol(t.beginColumn); }
 |   t = <LIT_REAL> { return (Expresion) sem.factor_literal_real(t.image).ponFila(t.beginLine).ponCol(t.beginColumn); }
-|   t = <FALSE> { return (Expresion) sem.factor_literal_bool(t.image).ponFila(t.beginLine).ponCol(t.beginColumn); }
-|   t = <TRUE> { return (Expresion) sem.factor_literal_bool(t.image).ponFila(t.beginLine).ponCol(t.beginColumn); }
+|   t = <FALSE> { return (Expresion) sem.factor_literal_bool("<"+t.image+">").ponFila(t.beginLine).ponCol(t.beginColumn); }
+|   t = <TRUE> { return (Expresion) sem.factor_literal_bool("<"+t.image+">").ponFila(t.beginLine).ponCol(t.beginColumn); }
 |   t = <LIT_CADENA> { return (Expresion) sem.factor_literal_cadena(t.image).ponFila(t.beginLine).ponCol(t.beginColumn); }
 |   t = <NULL> { return (Expresion) sem.factor_null().ponFila(t.beginLine).ponCol(t.beginColumn); }
 |   t = <IDEN> { return (Expresion) sem.factor_identificador(t.image).ponFila(t.beginLine).ponCol(t.beginColumn); }

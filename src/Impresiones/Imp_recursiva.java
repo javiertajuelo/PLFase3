@@ -259,13 +259,13 @@ public class Imp_recursiva extends SintaxisAbstractaEval {
     		imprimeExpBin(e.Opn0(), "<or>", e.Opn1(),4,4, e.leeFila(), e.leeCol());
     	}
     	else if (claseDe(e, ExpMul.class)) {
-    		imprimeExpBin(e.Opn0(), "*", e.Opn1(),5,4, e.leeFila(), e.leeCol());
+    		imprimeExpBin(e.Opn0(), "*", e.Opn1(),4,5, e.leeFila(), e.leeCol());
     		
     	}else if (claseDe(e, ExpDiv.class)) {
-    		imprimeExpBin(e.Opn0(), "/", e.Opn1(),5,4, e.leeFila(), e.leeCol());
+    		imprimeExpBin(e.Opn0(), "/", e.Opn1(),4,5, e.leeFila(), e.leeCol());
     	}
     	else if (claseDe(e, ExpMod.class)) {
-    		imprimeExpBin(e.Opn0(), "%", e.Opn1(),5,4, e.leeFila(), e.leeCol());	
+    		imprimeExpBin(e.Opn0(), "%", e.Opn1(),4,5, e.leeFila(), e.leeCol());	
     	}
     	else if (claseDe(e, ExpUnariaMenos.class)) {
     		System.out.println("-$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");

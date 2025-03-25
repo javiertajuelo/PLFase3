@@ -23,11 +23,11 @@ public class Main{
 			p.procesa(new Imp_Visitante());
 			
 		} catch (TokenMgrError e) {
-			System.out.println("ERROR_LEXICO");
+			System.out.print("ERROR_LEXICO");
 			// System.out.println(e.getMessage());
 
 		} catch (ParseException e) {
-			System.out.println("ERROR_SINTACTICO");
+			System.out.print("ERROR_SINTACTICO");
 			// System.out.println(e.getMessage());
 
 		}

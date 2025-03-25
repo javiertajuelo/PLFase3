@@ -942,12 +942,12 @@ Token t; Expresion e;
         }
       case FALSE:{
         t = jj_consume_token(FALSE);
-{if ("" != null) return (Expresion) sem.factor_literal_bool(t.image).ponFila(t.beginLine).ponCol(t.beginColumn);}
+{if ("" != null) return (Expresion) sem.factor_literal_bool("<"+t.image+">").ponFila(t.beginLine).ponCol(t.beginColumn);}
         break;
         }
       case TRUE:{
         t = jj_consume_token(TRUE);
-{if ("" != null) return (Expresion) sem.factor_literal_bool(t.image).ponFila(t.beginLine).ponCol(t.beginColumn);}
+{if ("" != null) return (Expresion) sem.factor_literal_bool("<"+t.image+">").ponFila(t.beginLine).ponCol(t.beginColumn);}
         break;
         }
       case LIT_CADENA:{

@@ -274,15 +274,15 @@ public class Imp_Visitante extends ProcesamientoDef{
 	}
 	
 	public void procesa(ExpMul e) {
-		imprimeExpBin(e.Opn0(), "*", e.Opn1(),5,4, e.leeFila(), e.leeCol());	
+		imprimeExpBin(e.Opn0(), "*", e.Opn1(),4,5, e.leeFila(), e.leeCol());	
 	}
 	
 	public void procesa(ExpDiv e) {
-		imprimeExpBin(e.Opn0(), "/", e.Opn1(),5,4, e.leeFila(), e.leeCol());	
+		imprimeExpBin(e.Opn0(), "/", e.Opn1(),4,5, e.leeFila(), e.leeCol());	
 	}
 	
 	public void procesa(ExpMod e) {
-		imprimeExpBin(e.Opn0(), "%", e.Opn1(),5,4, e.leeFila(), e.leeCol());	
+		imprimeExpBin(e.Opn0(), "%", e.Opn1(),4,5, e.leeFila(), e.leeCol());	
 	}
 	
 	public void procesa(ExpUnariaMenos e) {
