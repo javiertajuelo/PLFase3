@@ -20,13 +20,12 @@ import c_ast_descendente.TokenMgrError;
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.Symbol;
 
-public class Main {
+public class DomJudge {
 
 	public static void main(String[] args) throws Exception {
 
-		Reader input = new InputStreamReader(new FileInputStream("sample1a.in"));
+		Reader input = new InputStreamReader(System.in);
 		char mode = (char) input.read();
-		System.out.println("char: " + mode);
 
 		if (mode == 'a') {
 			ComplexSymbolFactory csf = new ComplexSymbolFactory();
@@ -56,7 +55,7 @@ public class Main {
 
 		} else {
 			System.out.println("CONSTRUCCION AST DESCENDENTE");
-			ConstructorASTsTiny asint = new ConstructorASTsTinyDJ(new FileReader("sample5d.in"));
+			ConstructorASTsTiny asint = new ConstructorASTsTinyDJ(input);
 			asint.disable_tracing();
 
 			try {
