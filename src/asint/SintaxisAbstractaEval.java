@@ -1,7 +1,19 @@
 package asint;
 
+import asint.SintaxisAbstractaEval.Expresion;
 
 public class SintaxisAbstractaEval {
+	
+	private static void imprimeOpnd(Expresion opnd, int np) {
+        if(opnd.prioridad() < np) {System.out.println("(");};
+        opnd.imprime();
+        if(opnd.prioridad() < np) {System.out.println(")");};        
+    }
+    private static void imprimeExpBin(Expresion opnd0, String op, Expresion opnd1, int np0, int np1, int f, int c) {
+        imprimeOpnd(opnd0,np0);
+        System.out.println(op+"$f:" + f + ",c:"+c+"$");
+        imprimeOpnd(opnd1,np1);
+    }
 
     public static abstract class Nodo {
         private int fila, col;
@@ -566,9 +578,10 @@ public class SintaxisAbstractaEval {
         public String iden() {return this.id;}
 		@Override
 		public void imprime() {
-			System.out.println("&");
+
     		tipo.imprime();
-    		System.out.println(id);
+    		System.out.println("&");
+    		System.out.println(id +"$f:"+this.leeFila()+",c:"+this.leeCol()+"$");
 		}
 
 		@Override
@@ -978,7 +991,10 @@ public class SintaxisAbstractaEval {
 
         public String toString() { return "sin_argumentos"; }
 		@Override
-		public void imprime() {}
+		public void imprime() {
+			System.out.println("(");
+			System.out.println(")");
+		}
 
 		@Override
 		public void procesa(Procesamiento p) {
@@ -1045,6 +1061,7 @@ public class SintaxisAbstractaEval {
         public Expresion Opn1() {throw new UnsupportedOperationException();}
         public String campo() {throw new UnsupportedOperationException();}
         public String lit() {throw new UnsupportedOperationException();}
+        public int prioridad() {throw new UnsupportedOperationException();}
     }
     
     public static class ExpAsignacion extends Expresion {
@@ -1057,11 +1074,10 @@ public class SintaxisAbstractaEval {
         public String toString() { return "asign(" + izq + ", " + der + ")"; }
         public Expresion Opn0() {return this.izq;}
         public Expresion Opn1() {return this.der;}
+        public int prioridad() {return 0;}
 		@Override //Patrón Intérprete
 		public void imprime() {
-			izq.imprime();
-    		System.out.println("=$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
-    		der.imprime();
+			imprimeExpBin(izq, "=", der,1,0, this.leeFila(), this.leeCol());	
 		}
 
 		@Override
@@ -1079,11 +1095,10 @@ public class SintaxisAbstractaEval {
         public String toString() { return "menor(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        public int prioridad() {return 1;}
         @Override //Patrón Intérprete
 		public void imprime() {
-			opnd0.imprime();
-    		System.out.println("<$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
-    		opnd1.imprime();
+        	imprimeExpBin(opnd0, "<", opnd1,1,2, this.leeFila(), this.leeCol());
 		}
 		@Override
 		public void procesa(Procesamiento p) {
@@ -1101,11 +1116,10 @@ public class SintaxisAbstractaEval {
         public String toString() { return "mayor(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        public int prioridad() {return 1;}
         @Override //Patrón Intérprete
 		public void imprime() {
-			opnd0.imprime();
-    		System.out.println(">$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
-    		opnd1.imprime();
+        	imprimeExpBin(opnd0, ">", opnd1,1,2, this.leeFila(), this.leeCol());
 		}
 
 		@Override
@@ -1124,11 +1138,10 @@ public class SintaxisAbstractaEval {
         public String toString() { return "menor_igual(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        public int prioridad() {return 1;}
         @Override //Patrón Intérprete
 		public void imprime() {
-			opnd0.imprime();
-    		System.out.println("<=$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
-    		opnd1.imprime();
+        	imprimeExpBin(opnd0, "<=", opnd1,1,2, this.leeFila(), this.leeCol());
 		}
 
 		@Override
@@ -1147,11 +1160,10 @@ public class SintaxisAbstractaEval {
         public String toString() { return "mayor_igual(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        public int prioridad() {return 1;}
         @Override //Patrón Intérprete
 		public void imprime() {
-			opnd0.imprime();
-    		System.out.println(">=$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
-    		opnd1.imprime();
+        	imprimeExpBin(opnd0, ">=", opnd1,1,2, this.leeFila(), this.leeCol());
 		}
 
 		@Override
@@ -1170,11 +1182,10 @@ public class SintaxisAbstractaEval {
         public String toString() { return "igual_igual(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        public int prioridad() {return 1;}
         @Override //Patrón Intérprete
 		public void imprime() {
-			opnd0.imprime();
-    		System.out.println("==$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
-    		opnd1.imprime();
+        	imprimeExpBin(opnd0, "==", opnd1,1,2, this.leeFila(), this.leeCol());
 		}
 
 		@Override
@@ -1193,11 +1204,10 @@ public class SintaxisAbstractaEval {
         public String toString() { return "distinto(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        public int prioridad() {return 1;}
         @Override //Patrón Intérprete
 		public void imprime() {
-			opnd0.imprime();
-    		System.out.println("!=$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
-    		opnd1.imprime();
+        	imprimeExpBin(opnd0, "!=", opnd1,1,2, this.leeFila(), this.leeCol());
 		}
 
 		@Override
@@ -1216,11 +1226,10 @@ public class SintaxisAbstractaEval {
         public String toString() { return "suma(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        public int prioridad() {return 2;}
         @Override //Patrón Intérprete
 		public void imprime() {
-			opnd0.imprime();
-    		System.out.println("+$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
-    		opnd1.imprime();
+        	imprimeExpBin(opnd0, "+", opnd1,2,3, this.leeFila(), this.leeCol());
 		}
 
 		@Override
@@ -1239,11 +1248,10 @@ public class SintaxisAbstractaEval {
         public String toString() { return "resta(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        public int prioridad() {return 2;}
         @Override //Patrón Intérprete
 		public void imprime() {
-			opnd0.imprime();
-    		System.out.println("-$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
-    		opnd1.imprime();
+        	imprimeExpBin(opnd0, "-", opnd1,3,3, this.leeFila(), this.leeCol());
 		}
 
 		@Override
@@ -1262,11 +1270,10 @@ public class SintaxisAbstractaEval {
         public String toString() { return "and(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        public int prioridad() {return 3;}
         @Override //Patrón Intérprete
 		public void imprime() {
-			opnd0.imprime();
-    		System.out.println("<and>$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
-    		opnd1.imprime();
+        	imprimeExpBin(opnd0, "<and>", opnd1,4,3, this.leeFila(), this.leeCol());
 		}
 
 		@Override
@@ -1285,11 +1292,10 @@ public class SintaxisAbstractaEval {
         public String toString() { return "or(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        public int prioridad() {return 3;}
         @Override //Patrón Intérprete
 		public void imprime() {
-			opnd0.imprime();
-    		System.out.println("<or>$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
-    		opnd1.imprime();
+        	imprimeExpBin(opnd0, "<or>", opnd1,4,4, this.leeFila(), this.leeCol());
 		}
 
 		@Override
@@ -1308,11 +1314,10 @@ public class SintaxisAbstractaEval {
         public String toString() { return "mul(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        public int prioridad() {return 4;}
         @Override //Patrón Intérprete
 		public void imprime() {
-			opnd0.imprime();
-    		System.out.println("*$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
-    		opnd1.imprime();
+        	imprimeExpBin(opnd0, "*", opnd1,5,4, this.leeFila(), this.leeCol());
 		}
 
 		@Override
@@ -1331,11 +1336,10 @@ public class SintaxisAbstractaEval {
         public String toString() { return "div(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        public int prioridad() {return 4;}
         @Override //Patrón Intérprete
 		public void imprime() {
-			opnd0.imprime();
-    		System.out.println("/$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
-    		opnd1.imprime();
+        	imprimeExpBin(opnd0, "/", opnd1,5,4, this.leeFila(), this.leeCol());
 		}
 
 		@Override
@@ -1354,11 +1358,10 @@ public class SintaxisAbstractaEval {
         public String toString() { return "mod(" + opnd0 + ", " + opnd1 + ")"; }
         public Expresion Opn0() {return this.opnd0;}
         public Expresion Opn1() {return this.opnd1;}
+        public int prioridad() {return 4;}
         @Override //Patrón Intérprete
 		public void imprime() {
-			opnd0.imprime();
-    		System.out.println("%$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
-    		opnd1.imprime();
+        	imprimeExpBin(opnd0, "%", opnd1,5,4, this.leeFila(), this.leeCol());
 		}
 
 		@Override
@@ -1376,6 +1379,7 @@ public class SintaxisAbstractaEval {
       
         public String toString() { return "menos(" + opnd + ")"; }
         public Expresion Opn0() {return this.opnd;}
+        public int prioridad() {return 5;}
         @Override //Patrón Intérprete
 		public void imprime() {
     		System.out.println("-$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
@@ -1397,6 +1401,7 @@ public class SintaxisAbstractaEval {
 
         public String toString() { return "not(" + opnd + ")"; }
         public Expresion Opn0() {return this.opnd;}
+        public int prioridad() {return 5;}
         @Override //Patrón Intérprete
 		public void imprime() {
     		System.out.println("<not>$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");
@@ -1420,6 +1425,7 @@ public class SintaxisAbstractaEval {
         public String toString() { return "acceso_array(" + array + ", " + indice + ")"; }
         public Expresion Opn0() {return this.array;}
         public Expresion Opn1() {return this.indice;}
+        public int prioridad() {return 6;}
         @Override //Patrón Intérprete
 		public void imprime() {
 			array.imprime();
@@ -1445,6 +1451,7 @@ public class SintaxisAbstractaEval {
         public String toString() { return "acceso_punto(" + exp + ", " + campo + ")"; }
         public Expresion Opn0() {return this.exp;}
         public String campo() {return this.campo;}
+        public int prioridad() {return 6;}
         @Override //Patrón Intérprete
 		public void imprime() {
 			exp.imprime();
@@ -1468,6 +1475,7 @@ public class SintaxisAbstractaEval {
       
         public String toString() { return "acceso_puntero(" + exp + ")"; }
         public Expresion Opn0() {return this.exp;}
+        public int prioridad() {return 6;}
         @Override //Patrón Intérprete
 		public void imprime() {
 			exp.imprime();
@@ -1489,6 +1497,7 @@ public class SintaxisAbstractaEval {
   
         public String toString() { return "lit_ent(" + valor + ")"; }
         public String lit() {return this.valor;}
+        public int prioridad() {return 6;}
 		@Override //Patrón Intérprete
 		public void imprime() {
 			System.out.println(valor+"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
@@ -1509,6 +1518,7 @@ public class SintaxisAbstractaEval {
     
         public String toString() { return "lit_real(" + valor + ")"; }
         public String lit() {return this.valor;}
+        public int prioridad() {return 6;}
         @Override //Patrón Intérprete
 		public void imprime() {
 			System.out.println(valor+"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
@@ -1529,6 +1539,7 @@ public class SintaxisAbstractaEval {
     
         public String toString() { return "lit_bool(" + valor + ")"; }
         public String lit() {return this.valor;}
+        public int prioridad() {return 6;}
         @Override //Patrón Intérprete
 		public void imprime() {
 			System.out.println(valor +"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
@@ -1549,6 +1560,7 @@ public class SintaxisAbstractaEval {
   
         public String toString() { return "lit_cadena(" + valor + ")"; }
         public String lit() {return this.valor;}
+        public int prioridad() {return 6;}
         @Override //Patrón Intérprete
 		public void imprime() {
 			System.out.println(valor+"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
@@ -1569,6 +1581,7 @@ public class SintaxisAbstractaEval {
 
         public String toString() { return "iden(" + id + ")"; }
         public String lit() {return this.id;}
+        public int prioridad() {return 6;}
         @Override //Patrón Intérprete
 		public void imprime() {
 			System.out.println(id+"$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	
@@ -1584,6 +1597,7 @@ public class SintaxisAbstractaEval {
         public FactorNull() { super(); }
 
         public String toString() { return "null"; }
+        public int prioridad() {return 6;}
         @Override //Patrón Intérprete
 		public void imprime() {
 			System.out.println("<null>$f:" + this.leeFila() + ",c:"+this.leeCol()+"$");	

@@ -8,6 +8,17 @@ import asint.SintaxisAbstractaEval.*;
 
 public class Imp_recursiva extends SintaxisAbstractaEval {
 	
+	private void imprimeOpnd(Expresion opnd, int np) {
+        if(opnd.prioridad() < np) {System.out.println("(");};
+        evalExp(opnd);
+        if(opnd.prioridad() < np) {System.out.println(")");};        
+    }
+    private void imprimeExpBin(Expresion opnd0, String op, Expresion opnd1, int np0, int np1, int f, int c) {
+        imprimeOpnd(opnd0,np0);
+        System.out.println(op+"$f:" + f + ",c:"+c+"$");
+        imprimeOpnd(opnd1,np1);
+    }
+	
 	public class ECteNoDefinida extends RuntimeException {
         public ECteNoDefinida(String msg) {
             super(msg);
@@ -100,9 +111,9 @@ public class Imp_recursiva extends SintaxisAbstractaEval {
     		System.out.println(t.iden()+"$f:"+t.leeFila()+",c:"+t.leeCol()+"$");
     	}
     	else if(claseDe(t, ParametroReferencia.class)) {
-    		System.out.println("&");
     		evalTipo(t.tipo());
-    		System.out.println(t.iden());
+    		System.out.println("&");
+    		System.out.println(t.iden()+"$f:"+t.leeFila()+",c:"+t.leeCol()+"$");
     	}
     }
     
@@ -214,75 +225,47 @@ public class Imp_recursiva extends SintaxisAbstractaEval {
     
     private void evalExp(Expresion e) {
     	if(claseDe(e, ExpAsignacion.class)) {
-    		evalExp(e.Opn0());
-    		System.out.println("=$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-    		evalExp(e.Opn1());
+    		imprimeExpBin(e.Opn0(), "=", e.Opn1(),1,0, e.leeFila(), e.leeCol());
     	}
     	else if (claseDe(e, ExpRelMenor.class)) {
-    		evalExp(e.Opn0());
-    		System.out.println("<$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-    		evalExp(e.Opn1());
+    		imprimeExpBin(e.Opn0(), "<", e.Opn1(),1,2, e.leeFila(), e.leeCol());
     	}
     	else if (claseDe(e, ExpRelMayor.class)) {
-    		evalExp(e.Opn0());
-    		System.out.println(">$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-    		evalExp(e.Opn1());
+    		imprimeExpBin(e.Opn0(), ">", e.Opn1(),1,2, e.leeFila(), e.leeCol());
     	}
     	else if (claseDe(e, ExpRelMenorIgual.class)) {
-    		evalExp(e.Opn0());
-    		System.out.println("<=$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-    		evalExp(e.Opn1());
+    		imprimeExpBin(e.Opn0(), "<=", e.Opn1(),1,2, e.leeFila(), e.leeCol());
     	}
     	else if (claseDe(e, ExpRelMayorIgual.class)) {
-    		evalExp(e.Opn0());
-    		System.out.println(">=$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-    		evalExp(e.Opn1());
+    		imprimeExpBin(e.Opn0(), ">=", e.Opn1(),1,2, e.leeFila(), e.leeCol());
     	}
     	else if (claseDe(e, ExpRelIgualIgual.class)) {
-    		evalExp(e.Opn0());
-    		System.out.println("==$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-    		evalExp(e.Opn1());
+    		imprimeExpBin(e.Opn0(), "==", e.Opn1(),1,2, e.leeFila(), e.leeCol());
     	}
     	else if (claseDe(e, ExpRelDistinto.class)) {
-    		evalExp(e.Opn0());
-    		System.out.println("!=$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-    		evalExp(e.Opn1());
+    		imprimeExpBin(e.Opn0(), "!=", e.Opn1(),1,2, e.leeFila(), e.leeCol());
     	}
     	else if (claseDe(e, ExpAdicSuma.class)) {
-    		evalExp(e.Opn0());
-    		System.out.println("+$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-    		evalExp(e.Opn1());
+    		imprimeExpBin(e.Opn0(), "+", e.Opn1(),2,3, e.leeFila(), e.leeCol());	
     	}
     	else if (claseDe(e, ExpAdicResta.class)) {
-    		evalExp(e.Opn0());
-    		System.out.println("-$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-    		evalExp(e.Opn1());
+    		imprimeExpBin(e.Opn0(), "-", e.Opn1(),3,3, e.leeFila(), e.leeCol());
     		
     	}
     	else if (claseDe(e, ExpLogAnd.class)) {
-    		evalExp(e.Opn0());
-    		System.out.println("<and>$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-    		evalExp(e.Opn1());
+    		imprimeExpBin(e.Opn0(), "<and>", e.Opn1(),4,3, e.leeFila(), e.leeCol());	
     	}
     	else if (claseDe(e, ExpLogOr.class)) {
-    		evalExp(e.Opn0());
-    		System.out.println("<or>$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-    		evalExp(e.Opn1());
+    		imprimeExpBin(e.Opn0(), "<or>", e.Opn1(),4,4, e.leeFila(), e.leeCol());
     	}
     	else if (claseDe(e, ExpMul.class)) {
-    		evalExp(e.Opn0());
-    		System.out.println("*$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-    		evalExp(e.Opn1());
+    		imprimeExpBin(e.Opn0(), "*", e.Opn1(),5,4, e.leeFila(), e.leeCol());
     		
     	}else if (claseDe(e, ExpDiv.class)) {
-    		evalExp(e.Opn0());
-    		System.out.println("/$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-    		evalExp(e.Opn1());
+    		imprimeExpBin(e.Opn0(), "/", e.Opn1(),5,4, e.leeFila(), e.leeCol());
     	}
     	else if (claseDe(e, ExpMod.class)) {
-    		evalExp(e.Opn0());
-    		System.out.println("%$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-    		evalExp(e.Opn1());
+    		imprimeExpBin(e.Opn0(), "%", e.Opn1(),5,4, e.leeFila(), e.leeCol());	
     	}
     	else if (claseDe(e, ExpUnariaMenos.class)) {
     		System.out.println("-$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");

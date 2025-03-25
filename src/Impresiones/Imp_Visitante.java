@@ -5,6 +5,17 @@ import asint.SintaxisAbstractaEval.*;
 
 public class Imp_Visitante extends ProcesamientoDef{
 	
+	private void imprimeOpnd(Expresion opnd, int np) {
+        if(opnd.prioridad() < np) {System.out.println("(");};
+        opnd.procesa(this);
+        if(opnd.prioridad() < np) {System.out.println(")");};        
+    }
+    private void imprimeExpBin(Expresion opnd0, String op, Expresion opnd1, int np0, int np1, int f, int c) {
+        imprimeOpnd(opnd0,np0);
+        System.out.println(op+"$f:" + f + ",c:"+c+"$");
+        imprimeOpnd(opnd1,np1);
+    }
+	
 	public void procesa(Prog p) {
 		System.out.println("{");
     	p.dcs().procesa(this);
@@ -84,15 +95,25 @@ public class Imp_Visitante extends ProcesamientoDef{
 		System.out.println(t.iden()+"$f:"+t.leeFila()+",c:"+t.leeCol()+"$");
 	}
 	
+	public void procesa(Muchos_campos c) {
+		c.campos().procesa(this);
+		System.out.println(",");
+		c.dec().procesa(this);
+	}
+	
+	public void procesa(Un_campo c) {
+		c.dec().procesa(this);
+	}
+	
 	public void procesa(ParametroValor t) {
 		t.tipo().procesa(this);
 		System.out.println(t.iden()+"$f:"+t.leeFila()+",c:"+t.leeCol()+"$");
 	}
 	
 	public void procesa(ParametroReferencia t) {
-		System.out.println("&");
 		t.tipo().procesa(this);
-		System.out.println(t.iden());
+		System.out.println("&");
+		System.out.println(t.iden()+"$f:"+t.leeFila()+",c:"+t.leeCol()+"$");
 	}
 	
 	public void procesa(ConParametros p) {
@@ -209,87 +230,59 @@ public class Imp_Visitante extends ProcesamientoDef{
 	}
 	
 	public void procesa(ExpAsignacion e) {
-		e.Opn0().procesa(this);
-		System.out.println("=$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-		e.Opn1().procesa(this);
+		imprimeExpBin(e.Opn0(), "=", e.Opn1(),1,0, e.leeFila(), e.leeCol());	
 	}
 	
 	public void procesa(ExpRelMenor e) {
-		e.Opn0().procesa(this);
-		System.out.println("<$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-		e.Opn1().procesa(this);
+		imprimeExpBin(e.Opn0(), "<", e.Opn1(),1,2, e.leeFila(), e.leeCol());	
 	}
 	
 	public void procesa(ExpRelMayor e) {
-		e.Opn0().procesa(this);
-		System.out.println(">$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-		e.Opn1().procesa(this);
+		imprimeExpBin(e.Opn0(), ">", e.Opn1(),1,2, e.leeFila(), e.leeCol());	
 	}
 	
 	public void procesa(ExpRelMenorIgual e) {
-		e.Opn0().procesa(this);
-		System.out.println("<=$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-		e.Opn1().procesa(this);
+		imprimeExpBin(e.Opn0(), "<=", e.Opn1(),1,2, e.leeFila(), e.leeCol());	
 	}
 	
 	public void procesa(ExpRelMayorIgual e) {
-		e.Opn0().procesa(this);
-		System.out.println(">=$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-		e.Opn1().procesa(this);
+		imprimeExpBin(e.Opn0(), ">=", e.Opn1(),1,2, e.leeFila(), e.leeCol());	
 	}
 	
 	public void procesa(ExpRelIgualIgual e) {
-		e.Opn0().procesa(this);
-		System.out.println("==$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-		e.Opn1().procesa(this);
+		imprimeExpBin(e.Opn0(), "==", e.Opn1(),1,2, e.leeFila(), e.leeCol());	
 	}
 	
 	public void procesa(ExpRelDistinto e) {
-		e.Opn0().procesa(this);
-		System.out.println("!=$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-		e.Opn1().procesa(this);
+		imprimeExpBin(e.Opn0(), "!=", e.Opn1(),1,2, e.leeFila(), e.leeCol());	
 	}
 	
 	public void procesa(ExpAdicSuma e) {
-		e.Opn0().procesa(this);
-		System.out.println("+$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-		e.Opn1().procesa(this);
+		imprimeExpBin(e.Opn0(), "+", e.Opn1(),2,3, e.leeFila(), e.leeCol());	
 	}
 	
 	public void procesa(ExpAdicResta e) {
-		e.Opn0().procesa(this);
-		System.out.println("-$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-		e.Opn1().procesa(this);
+		imprimeExpBin(e.Opn0(), "-", e.Opn1(),3,3, e.leeFila(), e.leeCol());	
 	}
 	
 	public void procesa(ExpLogAnd e) {
-		e.Opn0().procesa(this);
-		System.out.println("<and>$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-		e.Opn1().procesa(this);
+		imprimeExpBin(e.Opn0(), "<and>", e.Opn1(),4,3, e.leeFila(), e.leeCol());	
 	}
 	
 	public void procesa(ExpLogOr e) {
-		e.Opn0().procesa(this);
-		System.out.println("<or>$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-		e.Opn1().procesa(this);
+		imprimeExpBin(e.Opn0(), "<or>", e.Opn1(),4,4, e.leeFila(), e.leeCol());	
 	}
 	
 	public void procesa(ExpMul e) {
-		e.Opn0().procesa(this);
-		System.out.println("*$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-		e.Opn1().procesa(this);
+		imprimeExpBin(e.Opn0(), "*", e.Opn1(),5,4, e.leeFila(), e.leeCol());	
 	}
 	
 	public void procesa(ExpDiv e) {
-		e.Opn0().procesa(this);
-		System.out.println("/$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-		e.Opn1().procesa(this);
+		imprimeExpBin(e.Opn0(), "/", e.Opn1(),5,4, e.leeFila(), e.leeCol());	
 	}
 	
 	public void procesa(ExpMod e) {
-		e.Opn0().procesa(this);
-		System.out.println("<$f:" + e.leeFila() + ",c:"+e.leeCol()+"$");
-		e.Opn1().procesa(this);
+		imprimeExpBin(e.Opn0(), "%", e.Opn1(),5,4, e.leeFila(), e.leeCol());	
 	}
 	
 	public void procesa(ExpUnariaMenos e) {

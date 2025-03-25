@@ -1,24 +1,37 @@
 package c_ast_descendente;
 import java.io.FileReader;
 
+import Impresiones.Imp_Visitante;
 import Impresiones.Imp_recursiva;
+import asint.SintaxisAbstractaEval.Prog;
 
 public class Main{
    public static void main(String[] args) throws Exception {
-      ConstructorASTsTiny asint = new ConstructorASTsTinyDJ(new FileReader("sample5d.in"));
-      asint.disable_tracing();
-      try {
-          new Imp_recursiva().evalua(asint.analiza());
-          System.out.println(asint.analiza());
+	   
+	   System.out.println("CONSTRUCCION AST DESCENDENTE");
+		ConstructorASTsTiny asint = new ConstructorASTsTinyDJ(new FileReader("sample5d.in"));
+		asint.disable_tracing();
 
-      }catch(TokenMgrError e) {
-     	 System.out.println("ERROR_LEXICO");
-     	 //System.out.println(e.getMessage());
+		try {
+			Prog p = asint.analiza();
+			System.out.print(p);
+			System.out.println("IMPRESION RECURSIVA");
+			new Imp_recursiva().evalua(p);
+			System.out.println("IMPRESION INTERPRETE");
+			p.imprime();
+			System.out.println("IMPRESION VISITANTE");
+			p.procesa(new Imp_Visitante());
+			
+		} catch (TokenMgrError e) {
+			System.out.println("ERROR_LEXICO");
+			// System.out.println(e.getMessage());
 
-      }catch(ParseException e) {
-     	 System.out.println("ERROR_SINTACTICO");
-     	 //System.out.println(e.getMessage());
+		} catch (ParseException e) {
+			System.out.println("ERROR_SINTACTICO");
+			// System.out.println(e.getMessage());
 
+		}
+		
+		
       }	
    }
-}
